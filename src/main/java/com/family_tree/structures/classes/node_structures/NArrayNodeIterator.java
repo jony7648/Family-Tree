@@ -115,4 +115,30 @@ public class NArrayNodeIterator {
 			return _iter_stack.get_count();
 		}
 	}
+
+	public static class BFS<T> implements Iterator<NArrayNode<T>>{
+		private Queue<NArrayNode<T>> node_queue = new Queue<>();
+		
+		public BFS(NArrayNode<T> root_node) {
+			for (NArrayNode<T> node : root_node.get_child_arr()) {
+				node_queue.add(node);
+			}
+		}
+
+		public NArrayNode<T> next() {
+			NArrayNode<T> queue_node = node_queue.front();
+			
+			for (NArrayNode<T> node : queue_node.get_child_arr()) {
+				node_queue.add(node);
+			}
+
+			node_queue.remove_front();
+
+			return queue_node;
+		}
+
+		public boolean hasNext() {
+			return !node_queue.is_empty();
+		}
+	}
 }

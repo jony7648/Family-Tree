@@ -23,7 +23,7 @@ public class NArrayNode<T> implements Iterable<NArrayNode<T>>, Search.ISearchabl
 		return _value;
 	}
 
-	NArrayNode<T> get_child(int index) {
+	public NArrayNode<T> get_child(int index) {
 		return _child_list.get(index);	
 	}
 
@@ -58,6 +58,10 @@ public class NArrayNode<T> implements Iterable<NArrayNode<T>>, Search.ISearchabl
 		return _child_list.size() != 0;	
 	}
 
+	public ArrayList<NArrayNode<T>> get_child_arr() {
+		return _child_list;
+	}
+
 	@Override
 	public String get_search_string(int option) {
 		if (_value != null && _value instanceof Search.ISearchableObject) {
@@ -72,11 +76,10 @@ public class NArrayNode<T> implements Iterable<NArrayNode<T>>, Search.ISearchabl
 	}
 
 	public Iterable<NArrayNode<T>> post_iter() {
-		return new Iterable<NArrayNode<T>>() {
-			@Override
-			public Iterator<NArrayNode<T>> iterator() {
-				return new NArrayNodeIterator.Post<T>(NArrayNode.this);	
-			}
-		};
+		return () -> new NArrayNodeIterator.Post<>(NArrayNode.this);	
+	}
+
+	public Iterable<NArrayNode<T>> bfs_iter() {
+		return () -> new NArrayNodeIterator.BFS<>(this);	
 	}
 }

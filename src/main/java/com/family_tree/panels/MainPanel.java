@@ -6,6 +6,7 @@ import com.family_tree.math_classes.Geometry.*;
 
 import com.family_tree.data_storage.*;
 import com.family_tree.structures.classes.node_structures.*;
+import com.family_tree.structures.classes.generic.Stack;
 import com.family_tree.algorithms.Search;
 import com.family_tree.Listener.*;
 
@@ -23,6 +24,19 @@ import java.awt.event.*;
 import java.awt.*;
 
 import java.util.Collections;
+import java.util.ArrayList;
+
+class NodeWidthHolder {
+	public NArrayNode<DrawNode> node;
+	public int width = 0;
+	public int depth = 0;
+
+	public NodeWidthHolder(NArrayNode<DrawNode> node, int width, int depth) {
+		this.node = node;	
+		this.width = width;
+		this.depth = depth;
+	}
+}
 
 class DateSelectionPanel extends JPanel {
 	DefaultComboBoxModel<Integer> day_list_model = new DefaultComboBoxModel<>();
@@ -360,7 +374,7 @@ public class MainPanel extends JPanel {
 		GridBagConstraints gbc = new GridBagConstraints();
 
 		setLayout(GRID_LAYOUT);	
-		setup_camera();
+		setup_draw_nodes();
 
 		_filter_selection_panel.listener.add_receiver(FilterSelectionPanel.Signals.NodeSearched, new Listener.ISignalFire<FilterSelectionPanel>() {
 			@Override
@@ -400,26 +414,176 @@ public class MainPanel extends JPanel {
 
 	}
 
-	private void setup_camera() {
+	private void setup_draw_nodes() {
 		Camera camera = _draw_panel.get_camera();
 
-		int height_level = 0;
+		final int MAX_STACK_HEIGHT = Integer.MAX_VALUE;
+		Stack<NArrayNode<DrawNode>> node_stack = new Stack<>();
+
 		
-		for (NArrayNode<DrawNode> node : _draw_root_node) {
+
+		/*
+		for (int parent_index=0; parent_index<_draw_root_node.child_count(); parent_index++) {
+			NArrayNode<DrawNode> parent_node = _draw_root_node.get_child(parent_index);
+			DrawNode parent_draw_node = parent_node.get_value();
+
+			//What we are going to do instead is figure out how left the nodes are
+			//then reverse bfs to draw them
+
+			camera.add_draw_object(parent_draw_node);
+		}
+		*/
+
+		//NodeWidthHolder current_holder = new NodeWidthHolder(_draw_root_node, _draw_root_node.get_child_arr().size(), 0);	
+		//node_stack.push(current_holder);
+		
+
+		int bottom_depth = 0;
+		
+		for (NArrayNode<DrawNode> node : _draw_root_node.bfs_iter()) {
+			int width = node.get_child_arr().size();
+			DrawNode draw_node = node.get_value();
+			Transform parent_transform = node.get_parent().get_value().get_transform();
+			float depth = parent_transform.rect.y + DrawNode.TOTAL_NODE_GAP_SPACE_Y;
+			
+			//child leaf node will position the parents
 			if (node.has_children() == false) {
-				continue;
+				draw_node.set_position(0, depth);
+				node_stack.push(node);	
 			}
 
-			
-			DrawNode draw_node = node.get_value();
-			
-			Rect draw_rect = draw_node.get_transform().rect;
-			camera.add_draw_object(node.get_value());
-			System.out.println(draw_node.get_person());
 
-			height_level++;
+			bottom_depth = (int)depth;
+			camera.add_draw_object(node.get_value());
+		}
+
+
+		//we alread have the nodes in a stack so a reverse BFS is easy
+
+		
+		int depth = bottom_depth;
+		NArrayNode<DrawNode> current_parent = _draw_root_node;
+		
+		int iter_x = 0;
+		while (!node_stack.is_empty() && depth == bottom_depth) {
+			NArrayNode<DrawNode> node = node_stack.top();
+			DrawNode draw_node = node.get_value();
+
+			if (draw_node.get_position().y != bottom_depth) {
+				break;
+			}
+
+
+			
+			int node_y = (int)draw_node.get_transform().rect.y;
+			node_stack.pop();
+
+			draw_node.set_position(iter_x * DrawNode.TOTAL_NODE_GAP_SPACE_X, node_y);
+
+			if (time_to_position_parents(node, current_parent, bottom_depth)) {
+				int parent_width = position_parents(node);	 
+				iter_x += parent_width; 
+			}
+			
+			
+			current_parent = node.get_parent();
+			iter_x++;
 		}
 	}
+
+	private boolean time_to_position_parents(NArrayNode<DrawNode> child_node, NArrayNode<DrawNode> current_parent, int bottom_depth) {
+		int depth = (int)child_node.get_value().get_transform().rect.y;
+		NArrayNode<DrawNode> parent = child_node.get_parent();
+		
+		//stack reverses order so the last node becomes the first
+		NArrayNode<DrawNode> last_node = child_node.get_parent().get_child_arr().getFirst();
+		
+		return (
+			child_node.has_parent() &&
+			child_node == last_node
+		);
+	}
+
+	private int position_parents(NArrayNode<DrawNode> root_child_node) {
+		NArrayNode<DrawNode> root_parent_node = root_child_node.get_parent();
+		NArrayNode<DrawNode> curr_node = root_child_node;
+		
+		int root_parent_child_count = root_parent_node.get_child_arr().size();
+
+		DrawNode left_node = root_parent_node.get_child_arr().getLast().get_value();	
+		DrawNode right_node = root_parent_node.get_child_arr().getFirst().get_value();	
+
+
+		while(true) {
+			NArrayNode<DrawNode> parent = curr_node.get_parent();	
+
+			float left_node_x = left_node.get_transform().rect.x;
+			float right_node_wall = right_node.get_transform().rect.x;
+			
+			System.out.println(left_node_x + "   " + right_node_wall);
+
+			System.out.println(left_node.get_person().get_first_name());
+			System.out.println(right_node.get_person().get_first_name());
+
+			Vector2 parent_position = new Vector2(
+				left_node_x + (right_node_wall - left_node_x) / 2,
+				right_node.get_position().y - DrawNode.TOTAL_NODE_GAP_SPACE_Y
+			);
+
+			parent.get_value().set_position(parent_position);
+
+			//positions parent's siblings
+			
+
+			//get parent_index
+			if (parent.has_parent() == false) {
+				System.out.println("Leaving because of");
+				System.out.println(curr_node.get_value().get_position());
+				break;
+			}
+			
+			int parent_index = 0;
+			ArrayList<NArrayNode<DrawNode>> ancestor_list = parent.get_parent().get_child_arr();
+			for (int i=0; i<ancestor_list.size(); i++) {
+				NArrayNode<DrawNode> ancestor = ancestor_list.get(i);
+				
+				if (ancestor == parent) {
+					parent_index = i;
+					break;
+				}
+			}
+
+
+
+			for (int i=0; i<ancestor_list.size(); i++) {
+				NArrayNode<DrawNode> ancestor = ancestor_list.get(i);
+				
+				if (ancestor == parent) {
+					continue;
+				}
+
+				System.out.println("i: "+ i);
+
+				Vector2 position = new Vector2(
+					right_node_wall + (i - parent_index) * DrawNode.TOTAL_NODE_GAP_SPACE_X,
+					parent_position.y
+				);
+
+
+				ancestor.get_value().set_position(position);
+
+			}
+
+
+			curr_node = parent;
+			
+			left_node = parent.get_child_arr().getFirst().get_value();	
+            right_node = parent.get_child_arr().getLast().get_value();	
+		}
+
+		return root_parent_child_count;
+	}
+
 
 	private void position_components() {
 		GridBagConstraints gbc = new GridBagConstraints();

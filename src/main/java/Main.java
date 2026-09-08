@@ -14,11 +14,10 @@ import com.family_tree.algorithms.*;
 import com.family_tree.data_storage.Person;
 import com.family_tree.draw_objects.DrawNode;
 
+import com.family_tree.math_classes.Geometry.*;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-
-
 
 class NodeDirectionTracker {
 	enum Direction {
@@ -52,16 +51,6 @@ public class Main {
 			root_node.add_child(draw_child);
 		}
 
-		for (NArrayNode<DrawNode> node : root_node) {
-			if (node == root_node) {
-				break;
-			}
-			
-			DrawNode draw_node = node.get_value();
-
-			System.out.println(draw_node.get_person().get_first_name());
-		}
-
 		return root_node;
 	}
 	
@@ -84,8 +73,8 @@ public class Main {
 			JsonNode child_arr = j_node.get(Person.CHILDREN_JSON_PROPERTY);
 
 			if (child_arr != null && child_arr.isArray()) {
-				for (JsonNode child : child_arr.) {
-					narray_node.add_child(create_person(child));
+				for (JsonNode child : child_arr) {
+					narray_node.add_child(create_person(child, dir_tracker));
 				}
 			}
 		}
