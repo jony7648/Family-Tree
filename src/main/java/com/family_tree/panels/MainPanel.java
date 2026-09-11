@@ -414,6 +414,8 @@ public class MainPanel extends JPanel {
 
 	}
 
+	
+
 	private void setup_draw_nodes() {
 		Camera camera = _draw_panel.get_camera();
 
@@ -439,6 +441,7 @@ public class MainPanel extends JPanel {
 		
 
 		int bottom_depth = 0;
+
 		
 		for (NArrayNode<DrawNode> node : _draw_root_node.bfs_iter()) {
 			int width = node.get_child_arr().size();
@@ -447,8 +450,11 @@ public class MainPanel extends JPanel {
 			float depth = parent_transform.rect.y + DrawNode.TOTAL_NODE_GAP_SPACE_Y;
 			
 			//child leaf node will position the parents
+			
+
+			draw_node.set_position(-600, depth);
+			
 			if (node.has_children() == false) {
-				draw_node.set_position(0, depth);
 				node_stack.push(node);	
 			}
 
@@ -465,18 +471,20 @@ public class MainPanel extends JPanel {
 		NArrayNode<DrawNode> current_parent = _draw_root_node;
 		
 		int iter_x = 0;
-		while (!node_stack.is_empty() && depth == bottom_depth) {
+		while (!node_stack.is_empty()) {
 			NArrayNode<DrawNode> node = node_stack.top();
 			DrawNode draw_node = node.get_value();
+			node_stack.pop();
+			System.out.println(node.get_value().get_person().get_first_name() + " Should?: " + node.get_parent().get_value().get_person());
+			System.out.println(node.get_parent().get_value().get_initial_position_flag());
 
-			if (draw_node.get_position().y != bottom_depth) {
-				break;
+
+			if (draw_node.get_position().y != bottom_depth && node.get_value().get_initial_position_flag()) {
+				get_position_based_on_parent();
+				continue;
 			}
-
-
 			
 			int node_y = (int)draw_node.get_transform().rect.y;
-			node_stack.pop();
 
 			draw_node.set_position(iter_x * DrawNode.TOTAL_NODE_GAP_SPACE_X, node_y);
 
@@ -489,18 +497,43 @@ public class MainPanel extends JPanel {
 			current_parent = node.get_parent();
 			iter_x++;
 		}
+
+		
+		camera.add_draw_object(_draw_root_node.get_value());
+	}
+
+	private void get_position_based_on_parent(NArrayNode<DrawNode> node) {
+		if (node.has_parent() == false)
+			return;
+
+		Vector2 node_pos = node.get_value().get_position().copy();	
+
+		//finish this code to set the position
+
 	}
 
 	private boolean time_to_position_parents(NArrayNode<DrawNode> child_node, NArrayNode<DrawNode> current_parent, int bottom_depth) {
 		int depth = (int)child_node.get_value().get_transform().rect.y;
 		NArrayNode<DrawNode> parent = child_node.get_parent();
+		DrawNode parent_draw_node = parent.get_value();
 		
 		//stack reverses order so the last node becomes the first
 		NArrayNode<DrawNode> last_node = child_node.get_parent().get_child_arr().getFirst();
 		
 		return (
+			parent_draw_node.get_initial_position_flag() == false &&
 			child_node.has_parent() &&
 			child_node == last_node
+		);
+	}
+
+	private Vector2 calculate_parent_pos(DrawNode left_node, DrawNode right_node) {
+		float left_node_x = left_node.get_position().x;
+		float right_node_wall = right_node.get_transform().rect.x;
+		
+		return new Vector2(
+			left_node_x + (right_node_wall - left_node_x) / 2,
+			left_node.get_position().y - DrawNode.TOTAL_NODE_GAP_SPACE_Y
 		);
 	}
 
@@ -516,29 +549,33 @@ public class MainPanel extends JPanel {
 
 		while(true) {
 			NArrayNode<DrawNode> parent = curr_node.get_parent();	
-
-			float left_node_x = left_node.get_transform().rect.x;
-			float right_node_wall = right_node.get_transform().rect.x;
+			parent.get_value().set_initial_position_flag();
 			
-			System.out.println(left_node_x + "   " + right_node_wall);
-
-			System.out.println(left_node.get_person().get_first_name());
-			System.out.println(right_node.get_person().get_first_name());
-
-			Vector2 parent_position = new Vector2(
-				left_node_x + (right_node_wall - left_node_x) / 2,
-				right_node.get_position().y - DrawNode.TOTAL_NODE_GAP_SPACE_Y
-			);
-
+			System.out.println(left_node.get_person().get_first_name() + " " + left_node.get_position());
+			System.out.println("left position: " + left_node.get_position());
+			System.out.println("parent: " + parent.get_value().get_person().get_first_name());
+			System.out.println(curr_node.get_value().get_person());
+			
+			Vector2 parent_position = calculate_parent_pos(left_node, right_node);
 			parent.get_value().set_position(parent_position);
 
+		
+			System.out.println(parent.get_value().get_person().get_first_name() + " pos: " + parent_position);
+
+			
 			//positions parent's siblings
 			
 
-			//get parent_index
+			//set root node then quit
 			if (parent.has_parent() == false) {
-				System.out.println("Leaving because of");
-				System.out.println(curr_node.get_value().get_position());
+				DrawNode root_left_node = parent.get_child_arr().getFirst().get_value();
+				DrawNode root_right_node = parent.get_child_arr().getLast().get_value();
+
+
+				Vector2 root_pos = calculate_parent_pos(root_left_node, root_right_node);
+				parent.get_value().set_position(root_pos);
+				System.out.println("Root pos: " +  root_pos);
+				
 				break;
 			}
 			
@@ -555,8 +592,10 @@ public class MainPanel extends JPanel {
 
 
 
+			float right_node_wall = right_node.get_transform().rect.x;
 			for (int i=0; i<ancestor_list.size(); i++) {
 				NArrayNode<DrawNode> ancestor = ancestor_list.get(i);
+				DrawNode ancestor_draw_node = ancestor.get_value();
 				
 				if (ancestor == parent) {
 					continue;
@@ -571,14 +610,24 @@ public class MainPanel extends JPanel {
 
 
 				ancestor.get_value().set_position(position);
+				ancestor_draw_node.set_initial_position_flag();
 
 			}
 
 
+			System.out.println(curr_node.get_value().get_position() + " " + parent.get_value().get_position());
 			curr_node = parent;
 			
-			left_node = parent.get_child_arr().getFirst().get_value();	
-            right_node = parent.get_child_arr().getLast().get_value();	
+
+				System.out.println("LOOPING START");
+			for (NArrayNode<DrawNode> node : parent.get_child_arr()) {
+				System.out.println(node.get_value().get_person().get_first_name());
+			}
+
+				System.out.println("LOOPING END");
+			
+			left_node = curr_node.get_parent().get_child_arr().getFirst().get_value();	
+            right_node = curr_node.get_parent().get_child_arr().getLast().get_value();	
 		}
 
 		return root_parent_child_count;

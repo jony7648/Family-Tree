@@ -19,6 +19,7 @@ public class DrawNode implements IDrawObject {
 
 	private Person _person;
 	private boolean _is_root_node = false;
+	private boolean _has_been_initally_positioned = false;
 	
 
 	public enum NODE_POSITION {Center, Left, Right};
@@ -63,10 +64,6 @@ public class DrawNode implements IDrawObject {
 
 	@Override 
 	public void draw(Graphics2D painter, Transform draw_transform) {
-		if (_is_root_node) {
-			return;
-		}
-		
 		Rect scale_rect = draw_transform.get_scale_rect();
 		
 		painter.draw(new Rectangle2D.Double(scale_rect.x, scale_rect.y, scale_rect.w, scale_rect.h));
@@ -80,6 +77,14 @@ public class DrawNode implements IDrawObject {
 	public void set_position(float x, float y) {
 		transform.rect.x = x;
 		transform.rect.y = y;
+	}
+
+	public void set_initial_position_flag() {
+		_has_been_initally_positioned = true;
+	}
+
+	public boolean get_initial_position_flag() {
+		return _has_been_initally_positioned;
 	}
 
 	public Vector2 get_position() {
