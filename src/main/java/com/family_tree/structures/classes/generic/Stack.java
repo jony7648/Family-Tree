@@ -9,12 +9,12 @@ public class Stack<T> {
 		_elem_list.add(value);
 	}
 
-	public T pop() {
+	public T pop() throws IndexOutOfBoundsException {
 		if (!_elem_list.isEmpty()) {
 			return _elem_list.removeLast();
 		}
 
-		return null;
+		throw new IndexOutOfBoundsException("Stack is empty, cannot remove element!");
 	}
 
 	public T top() {

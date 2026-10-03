@@ -4,16 +4,19 @@ import java.util.ArrayList;
 import com.family_tree.structures.classes.node_structures.LinkedList;
 
 public class Queue<T> {
-	private LinkedList.Head<T> _elem_list = new LinkedList.Head<>();
+	private LinkedList<T> _elem_list = new LinkedList<>();
 
 	public void add(T value) {
 		_elem_list.append(value);
 	}
 
-	public void remove_front() {
+	public T remove_front() {
 		if (!_elem_list.is_empty()) {
-			_elem_list.remove_head();
+			return _elem_list.remove_head();
 		}
+
+		throw new IndexOutOfBoundsException("Queue is empty, cannot remove element!!");
+		
 	}
 
 	public T front() {

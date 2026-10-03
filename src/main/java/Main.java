@@ -15,9 +15,13 @@ import com.family_tree.data_storage.Person;
 import com.family_tree.draw_objects.DrawNode;
 
 import com.family_tree.math_classes.Geometry.*;
+import com.family_tree.serialized_structures.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.toml.TomlMapper;
+
+import java.io.File;
 
 class NodeDirectionTracker {
 	enum Direction {
@@ -32,12 +36,11 @@ class NodeDirectionTracker {
 	public NodeDirectionTracker(Direction direction) {
 		this.direction = direction;
 	}
-	
 }
 
 public class Main {
 	private static NArrayNode<DrawNode> create_tree(JsonNode j_node) {
-		NArrayNode<DrawNode> root_node = new NArrayNode<>(new DrawNode(new Person()));
+		NArrayNode<DrawNode> root_node = new NArrayNode<>(new DrawNode());
 		root_node.get_value().assign_to_root();
 
 
@@ -58,6 +61,8 @@ public class Main {
 		Person person = new Person();
 		DrawNode draw_node = new DrawNode(person);
 		NArrayNode<DrawNode> narray_node = new NArrayNode<>(draw_node);
+
+		draw_node.set_tree_node(narray_node);
 
 
 		try {
@@ -89,14 +94,24 @@ public class Main {
 
 	public static void main(String[] args) {
 		final String TITLE = "Family Tree";
+
+		final String CONFIG_FILE_PATH = "config.toml";
 			
 		ObjectMapper mapper = new ObjectMapper();
 		String json_str = FileUtil.read_file("test.json");
 
-
 		NArrayNode<DrawNode> root_node;
 
+
+		//AppConfig app_config = new AppConfig(CONFIG_FILE_PATH);
+		//
+		TomlMapper toml_mapper = new TomlMapper();
+		AppConfig app_config;
+		
+
 		try {	
+			app_config = toml_mapper.readValue(new File(CONFIG_FILE_PATH), AppConfig.class);
+			
 			JsonNode json_node = mapper.readTree(json_str);
 			root_node = create_tree(json_node);
 		}
@@ -111,7 +126,7 @@ public class Main {
 
 		JFrame frame = new JFrame(TITLE);
 
-		MainPanel main_panel = new MainPanel(win_dimension, root_node);
+		MainPanel main_panel = new MainPanel(win_dimension, root_node, app_config);
 
 	
 

@@ -11,6 +11,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 public class Util {
+	public static class Pair<T1, T2> {
+		public T1 value1;
+		public T2 value2;
+		
+		public Pair(){}
+		public Pair(T1 value1, T2 value2) {
+			this.value1 = value1;
+			this.value2 = value2;
+		}
+	}
+	
 	public static class InvalidJsonPropertyException extends RuntimeException {
 		public InvalidJsonPropertyException(String message) {
 			super(message);
@@ -96,5 +107,6 @@ public class Util {
 	public static<T> boolean check_generic(Class<T> type, T object) {
 		return type.isInstance(object);	
 	}
+
 
 }

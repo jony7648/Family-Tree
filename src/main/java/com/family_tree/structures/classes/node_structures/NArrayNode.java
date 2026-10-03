@@ -1,11 +1,12 @@
 package com.family_tree.structures.classes.node_structures;
 
 import com.family_tree.algorithms.Search;
+import com.family_tree.structures.interfaces.NodeInterfaces.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class NArrayNode<T> implements Iterable<NArrayNode<T>>, Search.ISearchableObject {
+public class NArrayNode<T> implements Iterable<NArrayNode<T>>, ITreeNode<T>,  Search.ISearchableObject {
 	private ArrayList<NArrayNode<T>> _child_list = new ArrayList<>();
 	private NArrayNode<T> _parent;
 	private T _value;
@@ -54,8 +55,8 @@ public class NArrayNode<T> implements Iterable<NArrayNode<T>>, Search.ISearchabl
 		return _child_list.size();
 	}
 	
-	public boolean has_children() {
-		return _child_list.size() != 0;	
+	public boolean is_leaf() {
+		return _child_list.size() == 0;	
 	}
 
 	public ArrayList<NArrayNode<T>> get_child_arr() {
@@ -82,4 +83,30 @@ public class NArrayNode<T> implements Iterable<NArrayNode<T>>, Search.ISearchabl
 	public Iterable<NArrayNode<T>> bfs_iter() {
 		return () -> new NArrayNodeIterator.BFS<>(this);	
 	}
+
+	public Iterable<NArrayNode<T>> from_right_bfs() {
+		return () -> new NArrayNodeIterator.FromRightBFS<>(this);	
+	}
+
+	@Override
+	public boolean has_children() {
+		return !_child_list.isEmpty();
+	}
+
+	@Override
+	public int get_child_count() {
+		return _child_list.size();
+	}
+
+	@Override
+	public Iterable<? extends ITreeNode<T>> get_imeediate_children() {
+		return this.get_child_arr();
+	}
+
+    @Override
+    public Iterable<? extends ITreeNode<T>> get_all_children() {
+        return this; 
+    }
+	
+
 }

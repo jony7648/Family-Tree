@@ -1,16 +1,34 @@
 package com.family_tree.math_classes;
+
 public class Geometry {
-	public static class Vector2 {
+	public static interface I2DSpace {
+		float get_x();
+		float get_y();
+	}
+	
+	public static class Vector2 implements I2DSpace {
 		public float x = 0;
 		public float y = 0;
 
-		@Override public String toString() {
+		@Override 
+		public String toString() {
 			return String.format("(%f, %f)", x, y);
 		}
+
+		public Vector2() {};
 
 		public Vector2(float x, float y) {
 			this.x = x;
 			this.y = y;
+		}
+
+		public Vector2(float[] float_arr) throws IllegalStateException {
+			if (float_arr.length != 2) {
+				throw new IllegalStateException();
+			}
+
+			x = float_arr[0];
+			y = float_arr[1];
 		}
 
 		public Vector2 copy() {
@@ -18,14 +36,19 @@ public class Geometry {
 		}
 
 		public Vector2(float xy) {
-			this.x = xy;
-			this.y = xy;
+			x = xy;
+			y = xy;
 		}
 
-		public Vector2 add(Vector2 vec) {
+		public void add(I2DSpace space) {
+			x += space.get_x();
+			y += space.get_y();
+		}
+
+		public Vector2 subtract(I2DSpace space) {
 			return new Vector2(
-				x + vec.x,
-				y + vec.y
+				x - space.get_x(),
+				y - space.get_y()
 			);
 		}
 
@@ -36,17 +59,31 @@ public class Geometry {
 			);
 		}
 
-		public Vector2 scale(float scale_value) {
-			return new Vector2(
-				x * scale_value,
-				y * scale_value
-			);
+		public void scale(float scale_value) {
+			x *= scale_value;
+			y *= scale_value;
+		}
+
+		public void scale(float scale_x, float scale_y) {
+			x *= scale_x;
+			y *= scale_y;
+
+		}
+
+		@Override
+		public float get_x() {
+			return x;
+		}
+
+		@Override
+		public float get_y() {
+			return y;
 		}
 	}
 
 	
 
-	public static class Rect {
+	public static class Rect implements I2DSpace {
 		public float x = 0;
 		public float y = 0;
 		public float w = 0;
@@ -67,14 +104,44 @@ public class Geometry {
 			return new Rect(x,y,w,h);
 		}
 
-		public void add_position(Vector2 position) {
-			x += position.x;
-			y += position.y;
+		public Vector2 to_vector2() {
+			return new Vector2(x, y);
 		}
 
-		public void subtract_position(Vector2 position) {
-			x -= position.x;
-			y -= position.y;
+		public void add_position(I2DSpace space) {
+			x += space.get_x();
+			y += space.get_y();
+		}
+
+		public void subtract_position(I2DSpace space) {
+			x -= space.get_x();
+			y -= space.get_y();
+		}
+
+		public void scale(float scale) {
+			x *= scale;			
+			y *= scale;			
+			w *= scale;			
+			h *= scale;			
+		}
+
+		public void scale(float scale_x, float scale_y) {
+			x *= scale_x;			
+			y *= scale_y;			
+			w *= scale_x;			
+			h *= scale_y;			
+		}
+
+		
+
+		@Override
+		public float get_x() {
+			return x;
+		}
+
+		@Override
+		public float get_y() {
+			return y;
 		}
 	}
 
@@ -85,6 +152,10 @@ public class Geometry {
 		public Transform(Rect rect, Vector2 scale) {
 			this.rect = rect;
 			this.scale = scale;
+		}
+
+		public Transform(float x, float y, float w, float h) {
+			this.rect = new Rect(x, y, w, h);
 		}
 
 		public Transform() {}
