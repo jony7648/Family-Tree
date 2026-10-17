@@ -78,6 +78,8 @@ public class DrawNode implements IDrawObject {
 	public void draw(Transform draw_transform, IDrawObject.DrawParameters params) {
 		Rect scale_rect = draw_transform.get_scale_rect();
 
+		Graphics2D g = params.painter();
+
 		if (_tree_node != null && _tree_node.has_children()) {
 			for (ITreeNode<DrawNode> node : _tree_node.get_imeediate_children()) {
 				DrawNode draw_node = node.get_value();
@@ -97,7 +99,9 @@ public class DrawNode implements IDrawObject {
 				//params.painter().draw(draw_line);
 			}
 		}
-		params.painter().draw(new Rectangle2D.Double(scale_rect.x, scale_rect.y, scale_rect.w, scale_rect.h));
+
+		g.setColor(Color.LIGHT_GRAY);
+		g.draw(new Rectangle2D.Double(scale_rect.x, scale_rect.y, scale_rect.w, scale_rect.h));
 
 	}
 
@@ -123,6 +127,32 @@ public class DrawNode implements IDrawObject {
 		anchor_list.append(line);
 
 		return line;
+	}
+
+	static public long calculate_order(String first_name, String last_name) {
+		long order = 0;
+		
+		for (int i=0; i<first_name.length(); i++) {
+			Character let = first_name.charAt(i);
+			int order_val = let.charValue();
+
+			order += order_val;
+		}
+
+		for (int i=0; i<last_name.length(); i++) {
+			Character let = first_name.charAt(i);
+			int order_val = let.charValue();
+
+			order += order_val;
+		}
+
+		return order;
+	}
+
+	public long calculate_order() {
+		Person person = get_person();
+		
+		return calculate_order(person.get_first_name(), person.get_last_name());
 	}
 
 	@Override

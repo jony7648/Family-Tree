@@ -126,6 +126,7 @@ public class NArrayNodeIterator {
 			NArrayNode<T> queue_node = node_queue.front();
 			
 			for (NArrayNode<T> node : queue_node.get_child_arr()) {
+				System.out.println(node.get_value());
 				node_queue.add(node);
 			}
 

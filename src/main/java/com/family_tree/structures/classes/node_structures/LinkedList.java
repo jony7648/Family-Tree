@@ -2,18 +2,21 @@ package com.family_tree.structures.classes.node_structures;
 
 import java.lang.IndexOutOfBoundsException;
 import java.util.Iterator;
+import com.family_tree.algorithms.Sort;
+import java.util.List;
+import java.util.Collection;
 
 public class LinkedList<T> implements Iterable<T> {
-	public static class ListIterator<T> implements Iterator<T> {
-		Node<T> curr_node;
+	public class ListIterator implements Iterator<T> {
+		Node curr_node;
 		
-		public ListIterator(LinkedList<T> list) {
-			curr_node = list.get_head();
+		public ListIterator() {
+			curr_node = get_head();
 		}
 
 		@Override
 		public T next() {
-			Node<T> tmp_node = curr_node;
+			Node tmp_node = curr_node;
 			curr_node = curr_node.get_next();
 
 			return tmp_node.get_value();
@@ -24,16 +27,17 @@ public class LinkedList<T> implements Iterable<T> {
 			return curr_node != null;
 		}
 	}
-	
-	public static class Node<T> {
+
+
+	private class Node {
 		private T _value;
-		private Node<T> _next;	
+		private Node _next;	
 
 		public Node(T value) {
 			_value = value;
 		}
 
-		public void set_next(Node<T> next) {
+		public void set_next(Node next) {
 			_next = next;
 		}
 
@@ -41,7 +45,7 @@ public class LinkedList<T> implements Iterable<T> {
 			return _next != null;
 		}
 
-		public Node<T> get_next() {
+		public Node get_next() {
 			return _next;
 		}
 
@@ -49,9 +53,11 @@ public class LinkedList<T> implements Iterable<T> {
 			return _value;
 		}
 	}
+	
+	
 
-	private Node<T> _head;
-	private Node<T> _tail;
+	private Node _head;
+	private Node _tail;
 
 	private int _size = 0;
 
@@ -64,7 +70,7 @@ public class LinkedList<T> implements Iterable<T> {
 	public LinkedList() {};
 
 	public void prepend(T value) {
-		Node<T> new_head = new Node<>(value);
+		Node new_head = new Node(value);
 		_size++;
 
 		if (_size == 1) {
@@ -79,7 +85,7 @@ public class LinkedList<T> implements Iterable<T> {
 	}
 
 	public void append(T value) {
-		Node<T> new_tail = new Node<>(value);
+		Node new_tail = new Node(value);
 		_size++;
 
 		if (_size == 1) {
@@ -93,7 +99,7 @@ public class LinkedList<T> implements Iterable<T> {
 	}
 
 	public void insert(int index, T value) {
-		Node<T> new_node = new Node<T>(value);
+		Node new_node = new Node(value);
 		_size++;
 
 		if (_size == 1) { 
@@ -109,7 +115,7 @@ public class LinkedList<T> implements Iterable<T> {
 			return;
 		}
 
-		Node<T> iter_node = _head;
+		Node iter_node = _head;
 
 		for (int i=0; iter_node.has_next() && i<index; i++) {
 			iter_node = iter_node.get_next();	
@@ -131,7 +137,7 @@ public class LinkedList<T> implements Iterable<T> {
 			return;
 		}
 
-		Node<T> iter_node = _head.get_next();
+		Node iter_node = _head.get_next();
 
 		for (int iter_index=1; iter_node.has_next(); iter_index++) {
 
@@ -142,24 +148,56 @@ public class LinkedList<T> implements Iterable<T> {
 			iter_node = iter_node.get_next();
 		}
 
-		Node<T> next_node = iter_node.get_next();
+		Node next_node = iter_node.get_next();
 		iter_node.set_next(next_node.get_next());
 
 		_size--;
 	}
 
-	public void remove(T obj) {
-		if (_size == 0) { return;}
+	public T set(int index, T value) throws IndexOutOfBoundsException {
+		Node curr_node = _head;
+
+		if (index >= _size) {
+			throw new IndexOutOfBoundsException("Setting a value past the LinkedList bounds!");
+		}
+		
+		for (int i=0; i<index; i++) {
+			curr_node = curr_node._next;	
+		}
+
+		T old_value = curr_node._value;		
+
+		curr_node._value = value;
+		
+		return old_value;
+	}
+
+	public T get(int index) throws IndexOutOfBoundsException {
+		Node curr = _head;
+
+		if (index >= _size) {
+			throw new IndexOutOfBoundsException("Trying to access past the array bounds!");
+		}
+
+		for (int i=0; i<_size; i++) {
+			System.out.println(i);
+			curr = curr._next;
+		}
+
+		return curr._value;
+	}
+
+	public boolean remove(Object obj) {
+		if (_size == 0) { return false;}
 
 		if (obj == _head.get_value()) {
 			_head = _head.get_next();
 		}
 
-
-		Node<T> curr_node = _head.get_next();
+		Node curr_node = _head.get_next();
 
 		for (int i=1; curr_node.has_next(); i++) {
-			Node<T> next_node = curr_node.get_next();
+			Node next_node = curr_node.get_next();
 			
 			if (next_node.get_value() == obj) {
 				curr_node.set_next(next_node.get_next());
@@ -167,11 +205,85 @@ public class LinkedList<T> implements Iterable<T> {
 			}
 
 			curr_node = next_node;
+
+		}
+		return true;
+	}
+
+	private void remove_next_node(Node prev_node) {
+		_size--;	
+		
+		if (prev_node != null) {
+			if (prev_node._next == _tail) {
+				_tail = prev_node;
+				return;
+			}
+
+			prev_node._next = prev_node._next._next;
+		}
+		else { //if the node being removed is the head
+			_head = _head._next;
 		}
 	}
 
+	
+
+	public boolean removeAll(Collection<?> collection) {
+		boolean ret_state = false;
+		
+		for (Object elem : collection) {
+			//we need the previous node to avoid an O(mn^2)
+			Node prev_node = null;
+			Node curr_node = _head._next;
+
+			while (curr_node != null) {
+				if (curr_node._value == elem) {
+					ret_state = true;
+					remove_next_node(prev_node);
+				}
+				
+				prev_node = curr_node;
+				curr_node = curr_node._next;
+			}
+		}
+		
+		return ret_state;
+	}
+
+	public boolean retainAll(Collection<?> collection) {
+		boolean ret_state = false;
+
+		//we need the previous node to avoid an O(mn^2)
+		Node prev_node = null;
+		Node curr_node = _head._next;
+		
+		while (curr_node != null) {
+			boolean match_found = false;
+			
+			for (Object elem : collection) {
+				if (curr_node._value == elem) {
+					match_found = true;
+					ret_state = true;
+					break;
+				}
+			}
+
+
+			if (!match_found) {
+				remove_next_node(prev_node);
+			}
+
+			prev_node = curr_node;
+			curr_node = curr_node._next;
+
+		}
+		
+		
+		return ret_state;
+	}
+
 	public T remove_head() {
-		Node<T> ret_node = _head;
+		Node ret_node = _head;
 		_head = _head.get_next();
 		_size--;
 
@@ -179,20 +291,81 @@ public class LinkedList<T> implements Iterable<T> {
 		return ret_node.get_value();
 	}
 
+	public void clear() {
+		_size = 0;
+		_head = null;
+		_tail = null;
+	}
+
+	public boolean contains(Object object) {
+		for (Object value : this) {
+			if (value == object) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public Object[] toArray() {
+		Object[] ret_array = new Object[_size];
+
+		Node curr_node = _head;
+		
+		for (int i=0; i<_size; i++) {
+			ret_array[i] = curr_node.get_value();
+			curr_node = curr_node._next;
+		}
+
+		return ret_array;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <E> E[] toArray(E[] arr) throws IndexOutOfBoundsException {
+		if (arr.length < _size) {
+			throw new ArrayStoreException("Array size is too small!!");
+		}
+		
+		Node curr_node = _head;
+		
+		for (int i=0; i<_size; i++) {
+			arr[i] = (E)curr_node.get_value();
+			curr_node = curr_node._next;
+		}
+
+		return arr;
+	}
+
+	public T get_first() {
+		if (is_empty()) { 
+			return null;
+		}
+		
+		return _head._value;
+	}
+
+	public T get_last() {
+		if (!is_empty()) { 
+			return null;
+		}
+		
+		return _tail._value;
+	}
+
 	public boolean is_empty() {
 		return _size == 0;	
 	}
 
-	public Node<T> get_head() {
+	public int get_size() {
+		return _size;
+	}
+
+	private Node get_head() {
 		return _head;
 	}
 
-	public Node<T> get_tail() {
+	public Node get_tail() {
 		return _tail;
-	}
-
-	public int get_size() {
-		return _size;
 	}
 
 	@Override 
@@ -203,7 +376,7 @@ public class LinkedList<T> implements Iterable<T> {
 			return "[EMPTY LIST]";
 		}
 		
-		Node<T> iter_node = _head;
+		Node iter_node = _head;
 
 		for (int i=0; i<_size; i++) {
 			T value = iter_node.get_value();		
@@ -218,7 +391,7 @@ public class LinkedList<T> implements Iterable<T> {
 	}
 
 	@Override
-	public ListIterator<T> iterator() {
-		return new ListIterator<>(this);
+	public ListIterator iterator() {
+		return new ListIterator();
 	}
 }

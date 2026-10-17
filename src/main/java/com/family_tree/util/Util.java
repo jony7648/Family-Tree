@@ -108,5 +108,27 @@ public class Util {
 		return type.isInstance(object);	
 	}
 
+	public static String title_string(String str) {
+		StringBuilder ret_str = new StringBuilder(str.toLowerCase());
+
+		boolean capatilize_next = true;
+		for (int i=0; i<str.length(); i++ ) {
+			char curr_char = str.charAt(i);
+
+			if (capatilize_next) {
+				Character upper = Character.toUpperCase(curr_char);
+				ret_str.replace(i,i+1, upper.toString());
+				capatilize_next = false;
+			}
+			else if (curr_char == ' ') {
+				capatilize_next = true;
+			}
+		}
+
+		System.out.println(ret_str);
+		return ret_str.toString();
+			
+	}
+
 
 }

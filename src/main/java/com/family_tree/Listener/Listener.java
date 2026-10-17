@@ -8,21 +8,23 @@ public class Listener<HolderType, SignalEnum extends Enum<SignalEnum>> {
 	HolderType holder;
 	ArrayList<ReceiverRow> receiver_row_list;
 	
-	public static interface ISignalFire<T> {
-		public void fire(T holder, Object raw_emit_signal);
+	public interface ISignalFire<HolderType> {
+		public void fire(HolderType holder, Signal<HolderType> raw_emit_signal);
 	}
 
 	
 	public static class EmptySignal {};
 
-	public static class Signal<HolderType, SignalType> {
+	public static class Signal<HolderType> {
 		public HolderType emitter;
-		public SignalType sig_data;
+		public Object sig_data;
 
-		public Signal(HolderType emitter, SignalType sig_data) {
+		public Signal(HolderType emitter, Object sig_data) {
 			this.emitter = emitter;
 			this.sig_data = sig_data;
 		}
+
+		public Signal() {}
 	}
 
 	private class ReceiverRow {
@@ -49,7 +51,7 @@ public class Listener<HolderType, SignalEnum extends Enum<SignalEnum>> {
 			receiver_list.remove(id);
 		}
 
-		public void fire_signals(Signal<HolderType, SignalEnum> signal) {
+		public void fire_signals(Signal<HolderType> signal) {
 			for (ISignalFire<HolderType> signal_interface : receiver_list) {
 				signal_interface.fire(holder, signal);
 			}
@@ -57,7 +59,7 @@ public class Listener<HolderType, SignalEnum extends Enum<SignalEnum>> {
 
 		public void fire_signals() {
 			for (ISignalFire<HolderType> signal_interface : receiver_list) {
-				signal_interface.fire(holder, new EmptySignal());
+				signal_interface.fire(holder, new Signal<HolderType>());
 			}
 		}
 	}
@@ -79,7 +81,7 @@ public class Listener<HolderType, SignalEnum extends Enum<SignalEnum>> {
 		receiver_row.add(emit_interface);	
 	}
 
-	public void fire_signal(SignalEnum id, Signal<HolderType, SignalEnum> signal) {
+	public void fire_signal(SignalEnum id, Signal<HolderType> signal) {
 		ReceiverRow receiver_row = receiver_row_list.get(id.ordinal());
 		receiver_row.fire_signals(signal);
 	}

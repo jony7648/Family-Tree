@@ -31,6 +31,10 @@ public class EntryFieldLabel extends JPanel implements IJComponentPair {
 	@Override public JComponent get_component2() {
 		return text_field;
 	}
+
+	public JTextField get_text_field() {
+		return text_field;
+	}
 	
 	@Override public JPanel get_panel() {
 		return this;

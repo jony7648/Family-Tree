@@ -3,6 +3,7 @@ package com.family_tree.draw_objects.geometric;
 import com.family_tree.draw_components.interfaces.IDrawObject;
 import com.family_tree.math_classes.Geometry.*;
 import java.awt.geom.Line2D;
+import java.awt.*;
 
 public class LineObject implements IDrawObject {
 	private Transform _transform;
@@ -119,6 +120,7 @@ public class LineObject implements IDrawObject {
 		);
 
 
+		params.painter().setColor(Color.LIGHT_GRAY);
 		params.painter().draw(draw_line);
 	}
 }

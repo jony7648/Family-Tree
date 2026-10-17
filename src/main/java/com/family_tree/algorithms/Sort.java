@@ -1,12 +1,13 @@
 package com.family_tree.algorithms;
 
 import java.util.List;
+import java.util.Collection;
+import com.family_tree.structures.classes.node_structures.LinkedList;
 
 public class Sort {
 	public interface ISortable {
 		int get_order();
 		Object get_object();
-		ISortable copy();
 	}
 
 
@@ -25,11 +26,6 @@ public class Sort {
 		}
 
 		@Override
-		public OrderObject<T> copy() {
-			return new OrderObject<T>(this.order, this.object);
-		}
-
-		@Override
 		public T get_object() {
 			return object;
 		}
@@ -40,6 +36,20 @@ public class Sort {
 
 		list.set(index1, list.get(index2));
 		list.set(index2, tmp);
+	}
+
+	static <T> void swap_sortable(LinkedList<OrderObject<T>> list, int index1, int index2) {
+		OrderObject<T> tmp = list.get(index1);
+
+		list.set(index1, list.get(index2));
+		list.set(index2, tmp);
+	}
+
+	static <T> void swap_sortable(LinkedList<OrderObject<T>> list, int index1, int index2, OrderObject<T> obj1, OrderObject<T> obj2) {
+		OrderObject<T> tmp = list.get(index1);
+
+		list.set(index1, obj2);
+		list.set(index2, obj1);
 	}
 
 	static<T> void qsort(List<OrderObject<T>> list, int start, int end) {

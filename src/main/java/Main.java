@@ -13,6 +13,8 @@ import com.family_tree.structures.classes.generic.*;
 import com.family_tree.algorithms.*;
 import com.family_tree.data_storage.Person;
 import com.family_tree.draw_objects.DrawNode;
+import com.family_tree.structures.classes.node_structures.DrawNodeSearchTree;
+import com.family_tree.jcomponents.DrawPanel;
 
 import com.family_tree.math_classes.Geometry.*;
 import com.family_tree.serialized_structures.*;
@@ -23,20 +25,7 @@ import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 
 import java.io.File;
 
-class NodeDirectionTracker {
-	enum Direction {
-		CENTER,
-		LEFT,
-		RIGHT,
-	}
-	
-	public int furthest = 0;
-	public Direction direction = Direction.LEFT;
-	
-	public NodeDirectionTracker(Direction direction) {
-		this.direction = direction;
-	}
-}
+
 
 public class Main {
 	private static NArrayNode<DrawNode> create_tree(JsonNode j_node) {
@@ -49,21 +38,20 @@ public class Main {
 		}
 
 		for (JsonNode json_child : j_node) {
-			NodeDirectionTracker dir_tracker = new NodeDirectionTracker(NodeDirectionTracker.Direction.LEFT);
-			NArrayNode<DrawNode> draw_child = create_person(json_child, dir_tracker);
+			NArrayNode<DrawNode> draw_child = create_person(json_child);
 			root_node.add_child(draw_child);
 		}
 
 		return root_node;
 	}
 	
-	private static NArrayNode<DrawNode> create_person(JsonNode j_node, NodeDirectionTracker dir_tracker) {
+	private static NArrayNode<DrawNode> create_person(JsonNode j_node) {
 		Person person = new Person();
 		DrawNode draw_node = new DrawNode(person);
 		NArrayNode<DrawNode> narray_node = new NArrayNode<>(draw_node);
 
 		draw_node.set_tree_node(narray_node);
-
+		
 
 		try {
 			person.set_first_name(Util.access_json_node_property(j_node, Person.FIRST_NAME_JSON_PROPERTY).asText());
@@ -75,11 +63,15 @@ public class Main {
 			person.set_orgin_province(Util.access_json_node_property(j_node, Person.ORGIN_PROVINCE_JSON_PROPERTY).asText());
 			person.set_description(Util.access_json_node_property(j_node, Person.DESCRIPTION_JSON_PROPERTY).asText());
 			
+
 			JsonNode child_arr = j_node.get(Person.CHILDREN_JSON_PROPERTY);
+
 
 			if (child_arr != null && child_arr.isArray()) {
 				for (JsonNode child : child_arr) {
-					narray_node.add_child(create_person(child, dir_tracker));
+					NArrayNode<DrawNode> node = create_person(child);
+
+					narray_node.add_child(node);
 				}
 			}
 		}
@@ -87,7 +79,6 @@ public class Main {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
-		
 
 		return narray_node;
 	}
@@ -101,13 +92,10 @@ public class Main {
 		String json_str = FileUtil.read_file("test.json");
 
 		NArrayNode<DrawNode> root_node;
-
-
-		//AppConfig app_config = new AppConfig(CONFIG_FILE_PATH);
-		//
+		DrawNodeSearchTree node_search_tree = new DrawNodeSearchTree();
+		
 		TomlMapper toml_mapper = new TomlMapper();
 		AppConfig app_config;
-		
 
 		try {	
 			app_config = toml_mapper.readValue(new File(CONFIG_FILE_PATH), AppConfig.class);
@@ -121,14 +109,16 @@ public class Main {
 			return;
 		}
 
+		//add nodes to the search tree
+		for (NArrayNode<DrawNode> node : root_node.post_iter()) {
+			node_search_tree.add(node.get_value());	
+		}
 
 		Dimension win_dimension = new Dimension(600, 600);
 
 		JFrame frame = new JFrame(TITLE);
 
-		MainPanel main_panel = new MainPanel(win_dimension, root_node, app_config);
-
-	
+		DrawPanel main_panel = new DrawPanel(root_node, node_search_tree, win_dimension, app_config);
 
 		frame.setSize(win_dimension);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

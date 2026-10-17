@@ -20,7 +20,11 @@ public class Queue<T> {
 	}
 
 	public T front() {
-		return _elem_list.get_head().get_value();
+		if (_elem_list.is_empty()) {
+			throw new IndexOutOfBoundsException("Queue is empty");
+		}
+		
+		return _elem_list.get_first();
 	}
 
 	public int get_count() {

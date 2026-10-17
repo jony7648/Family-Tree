@@ -41,7 +41,7 @@ public class Camera {
 
 	public void on_draw(Graphics2D painter) {
 		_objects_rendered = 0;
-		
+
 		for (int row_index=0; row_index<_block_rows; row_index++) {
 			for(int column_index=0; column_index<_block_columns; column_index++) {
 				Vector2 pos = new Vector2(
@@ -87,11 +87,12 @@ public class Camera {
 
 	public void zoom_in() {
 		set_scale(_scale + ZOOM_FACTOR);
-		System.out.println("moving");
+		update_win_res(_win_width, _win_height);
 	}
 
 	public void zoom_out() {
 		set_scale(_scale - ZOOM_FACTOR);
+		update_win_res(_win_width, _win_height);
 	}
 
 	public void add_draw_object(IDrawObject draw_object) {
@@ -105,19 +106,21 @@ public class Camera {
 	public void update_win_res(int width, int height) {
 		_win_width = width;
 		_win_height = height;
-		
-		
 
-		_block_columns = (int)Math.ceilDiv(width, _render_scene.get_block_width());
-		_block_rows = (int)Math.ceilDiv(height, _render_scene.get_block_height());
+		//multiply the inverse scale by the width over the block width
+		
+		_block_columns = (int)Math.ceil(1/_scale * width / _render_scene.get_block_width());
+		_block_rows = (int)Math.ceil(1/_scale * height / _render_scene.get_block_height());
 
-		System.out.println("camera rows " + _block_rows);
 		System.out.println("camera columns " + _block_columns);
-
 	}
 	
 	public Scene get_render_scene() {
 		return _render_scene;
+	}
+
+	public void set_position(Vector2 position) {
+		_position = position;
 	}
 
 	public Vector2 get_position() {

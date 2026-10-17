@@ -6,7 +6,7 @@ import com.family_tree.structures.interfaces.NodeInterfaces.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class NArrayNode<T> implements Iterable<NArrayNode<T>>, ITreeNode<T>,  Search.ISearchableObject {
+public class NArrayNode<T> implements Iterable<NArrayNode<T>>, ITreeNode<T>, Search.ISearchableObject {
 	private ArrayList<NArrayNode<T>> _child_list = new ArrayList<>();
 	private NArrayNode<T> _parent;
 	private T _value;
