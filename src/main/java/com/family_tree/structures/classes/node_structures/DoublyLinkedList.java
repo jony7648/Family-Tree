@@ -23,7 +23,7 @@ public class DoublyLinkedList<T> implements Iterable<T> {
 		}
 	}
 	
-	public class Node {
+	private class Node {
 		private T value;
 		private Node prev;
 		private Node next;
@@ -176,7 +176,7 @@ public class DoublyLinkedList<T> implements Iterable<T> {
 
 	public T get(int index) throws NoSuchElementException {
 		if (_size <= index || index < 0) {
-			throw new NoSuchElementException("Index is not valid");
+			throw new IndexOutOfBoundsException("Trying to access past list bounds!");
 		}
 
 		Node curr_node = _head;

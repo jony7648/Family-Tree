@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 public class Date {
 	public static final LocalDate ERROR_DATE = LocalDate.of(0,3,1);
-
 	
 	public enum Month {
 		January,

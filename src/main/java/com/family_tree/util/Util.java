@@ -3,11 +3,15 @@ package com.family_tree.util;
 import java.util.function.BinaryOperator;
 
 import javax.swing.*;
+
 import java.awt.event.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 
+import java.util.NoSuchElementException;
 
 
 public class Util {
@@ -19,6 +23,26 @@ public class Util {
 		public Pair(T1 value1, T2 value2) {
 			this.value1 = value1;
 			this.value2 = value2;
+		}
+	}
+
+	public static class Optional<T> {
+		private T _value;
+
+		public boolean valid() {
+			return _value != null;
+		}
+
+		public T value() {
+			if (!valid()) {
+				throw new NoSuchElementException();
+			}
+
+			return _value;
+		}
+
+		public void set_value(T value) {
+			_value = value;
 		}
 	}
 	
@@ -127,7 +151,29 @@ public class Util {
 
 		System.out.println(ret_str);
 		return ret_str.toString();
-			
+	}
+
+	public static Optional<File> prompt_file(String file_description, String[] file_types) { 
+		//this method is used to prompt users for files from their disk
+
+
+		Optional<File> optional = new Optional<>();
+		JFileChooser chooser = new JFileChooser();
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG, PNG, & WEBP", "jpg", "png", "webp");
+		
+		chooser.setFileFilter(filter);	
+
+		int ret_code = chooser.showOpenDialog(null);
+
+
+		if (ret_code == JFileChooser.APPROVE_OPTION) {
+			File file = chooser.getSelectedFile();
+			System.out.println(file.getAbsolutePath());
+
+			optional.set_value(file);
+		}
+
+		return optional;
 	}
 
 

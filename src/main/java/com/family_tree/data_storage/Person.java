@@ -16,6 +16,24 @@ public class Person implements Search.ISearchableObject{
 		LastName,
 	}
 
+	public enum EditMenuOption {
+		FirstName("First Name"),
+		LastName("Last Name"),
+		Gender("Gender"),
+		BirthDate("Birth Date"),
+		PassingDate("Passing Date"),
+		CountryOfOrgin("Country Of Origin"),
+		Description("Description");
+
+		private final String label;
+		private EditMenuOption option_id;
+
+		EditMenuOption(String string) {
+			label = string;
+			option_id = this;
+		}
+	}
+
 	static final LocalDate DEFAULT_DATE = LocalDate.of(0,3,1);
 	static final String DEFAULT_STR_ENTRY = "N/A";
 
@@ -44,6 +62,7 @@ public class Person implements Search.ISearchableObject{
 		_birth_date = DEFAULT_DATE;
 		_date_of_passing = DEFAULT_DATE;
 	}
+
 
 	@Override
 	public String toString() {
@@ -156,6 +175,30 @@ public class Person implements Search.ISearchableObject{
 		return _description;
 	}
 
+	public String get_value_from_edit_option(EditMenuOption option) {
+		return switch (option) {
+			case FirstName -> _first_name;
+			case LastName -> _last_name;
+			case Gender -> _gender.toString();
+			case BirthDate -> _birth_date.toString();
+			case PassingDate -> _date_of_passing.toString();
+			case CountryOfOrgin -> _orgin_country;
+			case Description -> _description;
+		};
+	}
+
+	public void set_value_from_edit_option(EditMenuOption option, String value) {
+		switch (option) {
+			case FirstName -> _first_name = value;
+			case LastName -> _last_name = value;
+			case Gender -> set_gender(value);
+			case BirthDate -> set_birth_date(value);
+			case PassingDate -> set_date_of_passing(value);
+			//case CountryOfOrgin -> _orgin_country;
+			//case Description -> _description;
+		};
+	}
+
 	@Override
 	public String get_search_string(int property_value) {
 		SearchProperty[] property_arr = SearchProperty.values();
@@ -175,5 +218,7 @@ public class Person implements Search.ISearchableObject{
 				
 		return "";
 	}
+
+	
 }
 

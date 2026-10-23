@@ -31,6 +31,7 @@ public class Camera {
 	private int _block_rows = 0;
 
 	private int _objects_rendered = 0;
+	private boolean dog = true;
 
 	public Camera(Scene render_scene, int panel_width, int panel_height) {
 		_render_scene = render_scene;
@@ -41,6 +42,24 @@ public class Camera {
 
 	public void on_draw(Graphics2D painter) {
 		_objects_rendered = 0;
+
+		Iterable<IDrawObject> obj_iterator = _render_scene.get_vmap().get_elements_from_region(_position, _win_width, _win_height, _scale);
+
+		for (IDrawObject obj : obj_iterator) {
+			Transform object_transform = obj.get_transform().copy();
+
+			object_transform.rect.subtract_position(_position);
+			object_transform.scale = new Vector2(_scale, _scale);
+
+			IDrawObject.DrawParameters params = new IDrawObject.DrawParameters(painter, _position);
+
+			obj.draw(object_transform, params);
+			_objects_rendered++;
+		}
+			System.out.println("done");
+		/*
+
+
 
 		for (int row_index=0; row_index<_block_rows; row_index++) {
 			for(int column_index=0; column_index<_block_columns; column_index++) {
@@ -66,6 +85,12 @@ public class Camera {
 				}
 			}
 		}
+		*/
+	}
+
+	private void validate_position() {
+		_position.x = Math.clamp(_position.x, 0, _render_scene.SCENE_WIDTH);
+		_position.y = Math.clamp(_position.y, 0, _render_scene.SCENE_HEIGHT);
 	}
 
 	public void move(Vector2 move_vec) {
@@ -76,9 +101,7 @@ public class Camera {
 				
 		_position.add(move_vec);
 
-		_position.x = Math.clamp(_position.x, 0, _render_scene.SCENE_WIDTH);
-		_position.y = Math.clamp(_position.y, 0, _render_scene.SCENE_HEIGHT);
-
+		validate_position();	
 	}
 
 	public void set_scale(float ammount) {
@@ -119,8 +142,29 @@ public class Camera {
 		return _render_scene;
 	}
 
-	public void set_position(Vector2 position) {
-		_position = position;
+	public void set_position(Vector2 new_position) {
+		_position = new_position;
+	}
+
+	public void teleport_to_transform(Transform transform) {
+		Vector2 render_size = get_render_dimensions();
+
+		Rect rect = transform.get_scale_rect();
+		
+		//_position.x = rect.x - (render_size.x +  rect.w) / 2;
+		_position.x = rect.x + (rect.w - render_size.x)/2;
+		_position.y = rect.y + (rect.h - render_size.y)/2;
+
+		validate_position();
+
+	}
+
+	public void teleport_to_object(IDrawObject obj) {
+		teleport_to_transform(obj.get_transform());	
+	}
+
+	public Vector2 get_render_dimensions() {
+		return new Vector2(_win_width * 1/_scale, _win_height * 1/_scale);
 	}
 
 	public Vector2 get_position() {

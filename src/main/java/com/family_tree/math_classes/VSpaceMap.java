@@ -1,15 +1,127 @@
 package com.family_tree.math_classes;
 
-import com.family_tree.structures.classes.node_structures.LinkedList;
 import com.family_tree.draw_components.interfaces.IDrawObject;
 import com.family_tree.math_classes.Geometry.*;
+import com.family_tree.structures.classes.node_structures.PositionalList;
 
 import java.awt.*;
 import java.util.Iterator;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Line2D;
 
+import java.util.Iterator;
+
 public class VSpaceMap {
+	public class ObjectIterator implements Iterator<IDrawObject> {
+		int _render_rows_count = 0;
+		int _render_columns_count = 0;
+
+		int _row_start = 0;
+		int _column_start = 0;
+		
+		int _row_index = 0;
+		int _column_index = 0;
+
+		Block _curr_block;
+		PositionalList<IDrawObject>.Node _curr_object;
+
+		public ObjectIterator(Transform transform) {
+			_render_columns_count = (int)Math.ceil(1/transform.scale.x * transform.rect.w / BLOCK_WIDTH);
+			_render_rows_count = (int)Math.ceil(1/transform.scale.y * transform.rect.h / BLOCK_HEIGHT);
+
+			_column_start = (int)transform.rect.x / BLOCK_WIDTH;
+			_row_start = (int)transform.rect.y / BLOCK_HEIGHT;
+			 _curr_block = _BLOCK_ARR[_row_start][_column_start];
+			_curr_object = _curr_block.get_object_list().get_head_node();
+		}
+
+		public ObjectIterator(Vector2 position, float render_width, float render_height, float scale) {
+			_render_columns_count = (int)Math.ceil(1/scale * render_width / BLOCK_WIDTH);
+			_render_rows_count = (int)Math.ceil(1/scale * render_height / BLOCK_HEIGHT);
+
+			_column_start = (int)position.x / BLOCK_WIDTH;
+			_row_start = (int)position.y / BLOCK_HEIGHT;
+			_curr_block = _BLOCK_ARR[_row_start][_column_start];
+			_curr_object = _curr_block.get_object_list().get_head_node();
+		}
+
+
+		public Block block_next() {
+			int curr_row = _row_index + _row_start;
+			int curr_column = _column_index + _column_start;
+
+			if (curr_row >= _BLOCK_ROW_CONUT) {
+				_curr_block = null;
+				return null;	
+			}
+			
+			Block block = _BLOCK_ARR[curr_row][curr_column];
+
+			_column_index++;
+			
+			//add the molumn if we hit the last rendering column
+			_row_index += _column_index/_render_columns_count;
+			_column_index %= _render_columns_count;
+
+			_curr_object = block.get_object_list().get_head_node();
+			_curr_block = block;
+			
+			return block;
+		}
+
+		public IDrawObject next() {
+			IDrawObject ret_obj = _curr_object.get_value();
+			_curr_object = _curr_object.get_next();
+			return ret_obj;
+		}
+		
+		public boolean hasNext() {
+			/*
+			while (_curr_object == null) {
+			block_next();
+				if (_curr_block == null) {
+					return false;
+				}
+			}
+			*/
+			
+			//System.out.println(_curr_object);
+			while (_curr_block != null) {
+				if (_curr_object == null) {
+					block_next();	
+					
+					continue;
+				}
+				
+				if (block_is_edge(_curr_block)) {
+					
+					//system.out.println(_curr_block._index);
+					//System.out.println(_curr_object.get_value().get_transform());
+					break;	
+				}
+				if (_curr_block == access(_curr_object.get_value().get_transform().rect)) {
+					break;
+				}
+				
+				_curr_object = _curr_object.get_next();
+			}
+
+			
+			
+			return _curr_object != null;
+		}
+
+		public boolean block_is_edge(Block block) {
+			//check if a block is at the very left of the screen
+			System.out.println(block._index + " " + (block._index - _column_start) % _BLOCK_COLUMN_COUNT);
+
+			boolean is_start = (block._index - _column_start) % _BLOCK_COLUMN_COUNT == 0 ||
+				(block._index - _row_start*_BLOCK_COLUMN_COUNT) < _BLOCK_COLUMN_COUNT;
+			
+			return is_start;
+		}
+	}
+	
 	public static class RenderedObj {
 		private IDrawObject _obj;
 		public boolean _already_drawn = false;
@@ -36,7 +148,7 @@ public class VSpaceMap {
 	}
 	
 	public static class Block {
-		private LinkedList<IDrawObject> _object_list = new LinkedList<>();
+		private PositionalList<IDrawObject> _object_list = new PositionalList<>();
 
 		int _index = 0;
 
@@ -52,7 +164,7 @@ public class VSpaceMap {
 			_object_list.remove(obj);
 		}
 
-		public LinkedList<IDrawObject> get_object_list() {
+		public PositionalList<IDrawObject> get_object_list() {
 			return _object_list;
 		}
 
@@ -96,6 +208,7 @@ public class VSpaceMap {
 		_BLOCK_COLUMN_COUNT = (int)Math.ceil(region_x/block_width);
 
 		_BLOCK_ARR = new Block[_BLOCK_ROW_CONUT][_BLOCK_COLUMN_COUNT];
+
 
 		//initialize the block_arr
 		for (int i=0; i<_BLOCK_ROW_CONUT; i++) {
@@ -204,5 +317,9 @@ public class VSpaceMap {
 
 	public int get_block_row_count() {
 		return _BLOCK_ROW_CONUT;
+	}
+
+	public Iterable<IDrawObject> get_elements_from_region(Vector2 position, float render_width, float render_height, float scale) {
+		return () -> new ObjectIterator(position, render_width, render_height, scale);
 	}
 } 

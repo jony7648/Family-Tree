@@ -22,6 +22,11 @@ public class Geometry {
 			this.y = y;
 		}
 
+		public Vector2(I2DSpace space) {
+			this.x = space.get_x();
+			this.y = space.get_y();
+		}
+
 		public Vector2(float[] float_arr) throws IllegalStateException {
 			if (float_arr.length != 2) {
 				throw new IllegalStateException();

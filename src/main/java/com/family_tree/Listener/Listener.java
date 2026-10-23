@@ -58,9 +58,7 @@ public class Listener<HolderType, SignalEnum extends Enum<SignalEnum>> {
 		}
 
 		public void fire_signals() {
-			for (ISignalFire<HolderType> signal_interface : receiver_list) {
-				signal_interface.fire(holder, new Signal<HolderType>());
-			}
+			fire_signals(new Signal<HolderType>());		
 		}
 	}
 

@@ -2,8 +2,6 @@ package com.family_tree.structures.classes.node_structures;
 
 import java.lang.IndexOutOfBoundsException;
 import java.util.Iterator;
-import com.family_tree.algorithms.Sort;
-import java.util.List;
 import java.util.Collection;
 
 public class LinkedList<T> implements Iterable<T> {
@@ -173,14 +171,14 @@ public class LinkedList<T> implements Iterable<T> {
 	}
 
 	public T get(int index) throws IndexOutOfBoundsException {
+		if (index >= _size || index < 0) {
+			throw new IndexOutOfBoundsException("Trying to access past list bounds!");
+		}
+		
 		Node curr = _head;
 
-		if (index >= _size) {
-			throw new IndexOutOfBoundsException("Trying to access past the array bounds!");
-		}
-
-		for (int i=0; i<_size; i++) {
-			System.out.println(i);
+		for (int i=0; i<index; i++) {
+			System.out.println("Value: " + curr._value);
 			curr = curr._next;
 		}
 
@@ -209,6 +207,8 @@ public class LinkedList<T> implements Iterable<T> {
 		}
 		return true;
 	}
+
+	
 
 	private void remove_next_node(Node prev_node) {
 		_size--;	

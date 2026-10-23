@@ -18,12 +18,20 @@ import com.family_tree.jcomponents.DrawPanel;
 
 import com.family_tree.math_classes.Geometry.*;
 import com.family_tree.serialized_structures.*;
+import com.family_tree.singletons.*;
+import com.family_tree.application_menu.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 
 import java.io.File;
+
+/*
+
+String[] edit_menu_options = {"First Name", "Last Name", "Gender", "Birth Date", 
+	"Passing Date", "Orgin Country", "Orgin Country", "Description", "Children"};
+	*/
 
 
 
@@ -93,9 +101,14 @@ public class Main {
 
 		NArrayNode<DrawNode> root_node;
 		DrawNodeSearchTree node_search_tree = new DrawNodeSearchTree();
+
+		GeoInfo.load_country_file("assets/app_info/countries.txt");
+
 		
 		TomlMapper toml_mapper = new TomlMapper();
 		AppConfig app_config;
+
+		
 
 		try {	
 			app_config = toml_mapper.readValue(new File(CONFIG_FILE_PATH), AppConfig.class);
@@ -116,15 +129,56 @@ public class Main {
 
 		Dimension win_dimension = new Dimension(600, 600);
 
-		JFrame frame = new JFrame(TITLE);
-
 		DrawPanel main_panel = new DrawPanel(root_node, node_search_tree, win_dimension, app_config);
 
-		frame.setSize(win_dimension);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		frame.add(main_panel);
 
-		frame.setVisible(true);
+		//mac os menu bar setup
+		System.setProperty("apple.laf.useScreenMenuBar", "true");
+		System.setProperty("apple.awt.application.name", "Family Tree");
+		
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		
+		javax.swing.SwingUtilities.invokeLater(() -> {
+			JMenuBar menu_bar = create_menu_bar(main_panel);
+			JFrame frame = new JFrame(TITLE);
+			
+			frame.setSize(win_dimension);
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.add(main_panel);
+
+		
+			
+			frame.setJMenuBar(menu_bar);
+			
+			frame.setVisible(true);
+		});
+
+	}
+
+	public static JMenuBar create_menu_bar(DrawPanel draw_panel) {
+		JMenuBar menu_bar = new JMenuBar();
+		JMenu new_menu = new JMenu("New");
+		
+		JMenu edit_menu = new JMenu("Edit");
+		JMenu history_menu = new JMenu("History");
+		JMenu find_menu = new JMenu("Find");
+
+		
+		AppBar.create_menu_items(edit_menu, Person.EditMenuOption.class, (e, edit_option) -> {
+			draw_panel.edit_node(edit_option);
+		});
+		
+		menu_bar.add(new_menu);
+		menu_bar.add(edit_menu);
+
+		return menu_bar;
 	}
 }
