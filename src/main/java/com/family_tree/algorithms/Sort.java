@@ -3,15 +3,16 @@ package com.family_tree.algorithms;
 import java.util.List;
 import java.util.Collection;
 import com.family_tree.structures.classes.node_structures.LinkedList;
+import com.family_tree.structures.classes.node_structures.PositionalList;
+import com.family_tree.draw_objects.DrawNode;
 
 public class Sort {
 	public interface ISortable {
-		int get_order();
-		Object get_object();
+		long get_order();
 	}
 
 
-	static class OrderObject<T> implements ISortable {
+	public static class OrderObject<T> implements ISortable {
 		private int order = 0;
 		public T object;	
 
@@ -21,48 +22,34 @@ public class Sort {
 		}
 
 		@Override
-		public int get_order() {
+		public long get_order() {
 			return order;
 		}
 
-		@Override
 		public T get_object() {
 			return object;
 		}
 	}
 	
-	static<T> void swap_sortable(List<OrderObject<T>> list, int index1, int index2) {
-		OrderObject<T> tmp = list.get(index1);
+
+	
+	static<T> void swap_sortable(PositionalList<DrawNode> list, int index1, int index2) {
+		DrawNode tmp = list.get(index1);
 
 		list.set(index1, list.get(index2));
 		list.set(index2, tmp);
 	}
 
-	static <T> void swap_sortable(LinkedList<OrderObject<T>> list, int index1, int index2) {
-		OrderObject<T> tmp = list.get(index1);
-
-		list.set(index1, list.get(index2));
-		list.set(index2, tmp);
-	}
-
-	static <T> void swap_sortable(LinkedList<OrderObject<T>> list, int index1, int index2, OrderObject<T> obj1, OrderObject<T> obj2) {
-		OrderObject<T> tmp = list.get(index1);
-
-		list.set(index1, obj2);
-		list.set(index2, obj1);
-	}
-
-	static<T> void qsort(List<OrderObject<T>> list, int start, int end) {
+	public static<T> void qsort(PositionalList<DrawNode> list, int start, int end) {
 		int i = start + 1;
 		int j = end;
 		int p = start;
 
-		int i_num = 0;
-		int j_num = 0;
-		int p_num = 0;
+		long i_num = 0;
+		long j_num = 0;
+		long p_num = 0;
 
 		if (start >= end - 1) {
-			System.out.println(start);
 			return;
 		}
 		

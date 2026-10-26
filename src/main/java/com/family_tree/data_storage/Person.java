@@ -2,8 +2,14 @@ package com.family_tree.data_storage;
 
 import java.time.LocalDate;
 import com.family_tree.algorithms.Search;
+import javax.swing.ImageIcon;
+import java.awt.Image;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import java.io.File;
 
-public class Person implements Search.ISearchableObject{
+
+public class Person implements Search.ISearchableObject {
 	public enum Gender {
 		Male,
 		Female,
@@ -48,6 +54,7 @@ public class Person implements Search.ISearchableObject{
 	public static final String ORGIN_PROVINCE_JSON_PROPERTY = "orgin_province";
 	public static final String DESCRIPTION_JSON_PROPERTY = "description";
 	public static final String CHILDREN_JSON_PROPERTY = "children";
+	public static final String PHOTO_JSON_PROPERTY = "photo_path";
 	
 	private String _first_name = DEFAULT_STR_ENTRY;
 	private String _last_name = DEFAULT_STR_ENTRY;
@@ -57,6 +64,7 @@ public class Person implements Search.ISearchableObject{
 	private String _orgin_country = DEFAULT_STR_ENTRY;
 	private	String _orgin_province = DEFAULT_STR_ENTRY;
 	private String _description = DEFAULT_STR_ENTRY;
+	private Image _icon_image;
 
 	public Person() {
 		_birth_date = DEFAULT_DATE;
@@ -84,6 +92,21 @@ public class Person implements Search.ISearchableObject{
 
 	public String get_first_name() {
 		return _first_name;
+	}
+
+	public void set_image(String path) {
+		try {
+			 _icon_image = ImageIO.read(new File(path));
+		}
+
+		catch (Exception e) {
+			System.out.println("Image failed to load");
+			e.printStackTrace();
+		}
+	}
+
+	public Image get_image() {
+		return _icon_image;
 	}
 
 	public void set_last_name(String last_name) {
@@ -218,7 +241,5 @@ public class Person implements Search.ISearchableObject{
 				
 		return "";
 	}
-
-	
 }
 

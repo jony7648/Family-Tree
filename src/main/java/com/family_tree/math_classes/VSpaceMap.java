@@ -3,6 +3,7 @@ package com.family_tree.math_classes;
 import com.family_tree.draw_components.interfaces.IDrawObject;
 import com.family_tree.math_classes.Geometry.*;
 import com.family_tree.structures.classes.node_structures.PositionalList;
+import com.family_tree.draw_components.classes.Camera;
 
 import java.awt.*;
 import java.util.Iterator;
@@ -23,17 +24,9 @@ public class VSpaceMap {
 		int _column_index = 0;
 
 		Block _curr_block;
+		final Block _TOP_LEFT_BLOCK;
 		PositionalList<IDrawObject>.Node _curr_object;
 
-		public ObjectIterator(Transform transform) {
-			_render_columns_count = (int)Math.ceil(1/transform.scale.x * transform.rect.w / BLOCK_WIDTH);
-			_render_rows_count = (int)Math.ceil(1/transform.scale.y * transform.rect.h / BLOCK_HEIGHT);
-
-			_column_start = (int)transform.rect.x / BLOCK_WIDTH;
-			_row_start = (int)transform.rect.y / BLOCK_HEIGHT;
-			 _curr_block = _BLOCK_ARR[_row_start][_column_start];
-			_curr_object = _curr_block.get_object_list().get_head_node();
-		}
 
 		public ObjectIterator(Vector2 position, float render_width, float render_height, float scale) {
 			_render_columns_count = (int)Math.ceil(1/scale * render_width / BLOCK_WIDTH);
@@ -43,6 +36,14 @@ public class VSpaceMap {
 			_row_start = (int)position.y / BLOCK_HEIGHT;
 			_curr_block = _BLOCK_ARR[_row_start][_column_start];
 			_curr_object = _curr_block.get_object_list().get_head_node();
+
+			_TOP_LEFT_BLOCK = _curr_block;
+		}
+
+		public ObjectIterator(Camera camera) {
+			//Vector2 render_size = camera.get_render_dimensions();
+			
+			this(camera.get_position(), camera.get_render_dimensions().x, camera.get_render_dimensions().y, (float)1.0);
 		}
 
 
@@ -92,14 +93,17 @@ public class VSpaceMap {
 					
 					continue;
 				}
+
+				Block obj_block = access(_curr_object.get_value().get_transform().rect);
+
+				if (_curr_block == _TOP_LEFT_BLOCK) {
+					break;
+				}
 				
-				if (block_is_edge(_curr_block)) {
-					
-					//system.out.println(_curr_block._index);
-					//System.out.println(_curr_object.get_value().get_transform());
+				if (block_is_edge(obj_block)) {
 					break;	
 				}
-				if (_curr_block == access(_curr_object.get_value().get_transform().rect)) {
+				if (_curr_block == obj_block) {
 					break;
 				}
 				
@@ -111,12 +115,15 @@ public class VSpaceMap {
 			return _curr_object != null;
 		}
 
-		public boolean block_is_edge(Block block) {
+		public boolean block_is_edge(Block obj_block) {
 			//check if a block is at the very left of the screen
-			System.out.println(block._index + " " + (block._index - _column_start) % _BLOCK_COLUMN_COUNT);
+			boolean is_start = (_curr_block._index - _column_start) % _BLOCK_COLUMN_COUNT == 0 ||
+				(_curr_block._index - _row_start*_BLOCK_COLUMN_COUNT) < _BLOCK_COLUMN_COUNT;
+			
+			is_start = is_start && 
+				get_block_column(_curr_block) == get_block_column(obj_block) ||
+				get_block_row(_curr_block) == get_block_row(obj_block);
 
-			boolean is_start = (block._index - _column_start) % _BLOCK_COLUMN_COUNT == 0 ||
-				(block._index - _row_start*_BLOCK_COLUMN_COUNT) < _BLOCK_COLUMN_COUNT;
 			
 			return is_start;
 		}
@@ -175,6 +182,8 @@ public class VSpaceMap {
 		public int get_index() {
 			return _index;
 		}
+
+		
 	}
 
 	public static class RowColumnPair {
@@ -319,7 +328,19 @@ public class VSpaceMap {
 		return _BLOCK_ROW_CONUT;
 	}
 
+	public int get_block_column(Block block) {
+		return block._index % _BLOCK_COLUMN_COUNT;
+	}
+
+	public int get_block_row(Block block) {
+		return block._index / _BLOCK_COLUMN_COUNT;
+	}
+
 	public Iterable<IDrawObject> get_elements_from_region(Vector2 position, float render_width, float render_height, float scale) {
 		return () -> new ObjectIterator(position, render_width, render_height, scale);
+	}
+
+	public Iterable<IDrawObject> get_elements_from_region(Camera camera) {
+		return () -> new ObjectIterator(camera);
 	}
 } 

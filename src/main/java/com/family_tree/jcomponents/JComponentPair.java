@@ -14,6 +14,7 @@ public class JComponentPair<T1, T2> extends JPanel implements IJComponentPair {
 
 			add((JComponent)component1);
 			add((JComponent)component2);
+			setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		}
 	}
 

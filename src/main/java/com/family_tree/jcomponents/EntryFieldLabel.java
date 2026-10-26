@@ -4,24 +4,27 @@ import javax.swing.*;
 import java.awt.*;
 
 public class EntryFieldLabel extends JPanel implements IJComponentPair {
-	public JLabel label = new JLabel("PlaceHolder");
-	public JTextField text_field = new JTextField("PlaceHolder");
+	public JLabel label;
+	public JTextField text_field;
+
+	final static int DEFAULT_BOX_WIDTH = 10;
 
 	public EntryFieldLabel(String text) {
-		super();
-
-		label.setText(text);
-		add(label);
-		add(text_field);
+		this(text, DEFAULT_BOX_WIDTH);
 	}
 
-	public EntryFieldLabel(String text, String label_text) {
+	public EntryFieldLabel(String label_text, int size) {
 		super();
 
-		label.setText(text);
-		text_field.setText(label_text);
+		text_field = new JTextField(size);
+		label = new JLabel(label_text);
+
 		add(label);
 		add(text_field);
+
+		text_field.setAlignmentX(Component.LEFT_ALIGNMENT);
+		label.setAlignmentX(Component.LEFT_ALIGNMENT);
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 	}
 	
 	@Override public JComponent get_component1() {

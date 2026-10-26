@@ -105,6 +105,7 @@ public class Geometry {
 			this.h = h;
 		}
 
+
 		public Rect copy() {
 			return new Rect(x,y,w,h);
 		}

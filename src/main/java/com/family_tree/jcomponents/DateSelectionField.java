@@ -10,7 +10,7 @@ public class DateSelectionField extends JPanel {
 	DefaultComboBoxModel<Integer> day_list_model = new DefaultComboBoxModel<>();
 	
 	JLabel name_label = new JLabel();
-	EntryFieldLabel year_combo_pair = new EntryFieldLabel("Year", "2026");
+	EntryFieldLabel year_combo_pair = new EntryFieldLabel("Year");
 
 	JComponentPair<JLabel, JComboBox<Date.Month>> month_combo_panel = new JComponentPair<> (
 		new JLabel("Month"),

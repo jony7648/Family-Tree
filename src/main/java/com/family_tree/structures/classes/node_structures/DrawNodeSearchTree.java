@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import com.family_tree.util.*;
+import java.util.Iterator;
+
+import com.family_tree.algorithms.Sort;
+import com.family_tree.algorithms.Search;
 
 public class DrawNodeSearchTree {
 	private HashMap<String, PositionalList<DrawNode>> _namemap = new HashMap<>();
@@ -35,9 +39,32 @@ public class DrawNodeSearchTree {
 
 			return list;
 		}
-		else {
-			return new PositionalList<>();
+
+		return new PositionalList<>();
+	}
+
+	public PositionalList<DrawNode> fuzzy_get(String first_name, String last_name) {
+		final int SEARCH_PROPERTY = 0;
+
+		String query = first_name + " " + last_name;
+		
+		query = Util.title_string(query);
+
+		PositionalList<DrawNode> ret_list = new PositionalList<DrawNode>();
+		Iterator<HashMap.Entry<String, PositionalList<DrawNode>>> iterator = _namemap.entrySet().iterator();
+
+		while (iterator.hasNext()) {
+			HashMap.Entry<String, PositionalList<DrawNode>> entry = iterator.next();
+			PositionalList<DrawNode> name_list = entry.getValue();
+
+			for (DrawNode node : name_list) {
+				ret_list.append(node);
+			}
 		}
+
+		PositionalList<DrawNode> search_list = Search.fuzzy(ret_list, SEARCH_PROPERTY, query);
+		
+		return search_list;
 	}
 
 	public PositionalList<DrawNode> get(String first_name, String last_name) {

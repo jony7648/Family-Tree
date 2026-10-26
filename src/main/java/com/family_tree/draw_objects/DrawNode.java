@@ -14,8 +14,10 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.awt.geom.Line2D;
+import com.family_tree.algorithms.Sort;
+import com.family_tree.algorithms.Search;
 
-public class DrawNode implements IDrawObject {
+public class DrawNode implements IDrawObject, Sort.ISortable, Search.ISearchableObject {
 	public enum NODE_POSITION {Center, Left, Right};
 	
 	public final static int NODES_PER_POSITION_WIDTH = 3;
@@ -29,11 +31,13 @@ public class DrawNode implements IDrawObject {
 	private Person _person;
 	private boolean _is_root_node = false;
 	private boolean _has_been_initally_positioned = false;
+	
 
-	Transform _transform = new Transform();
-	int node_space_needed = 1;
+	private Transform _transform = new Transform();
 
 	public LinkedList<IDrawObject> anchor_list = new LinkedList<>();
+
+	public long _order_value = 0;
 	
 	public DrawNode(ITreeNode<DrawNode> node, Person person, float x, float y) {
 		_transform.rect.x = x;
@@ -95,13 +99,16 @@ public class DrawNode implements IDrawObject {
 					scale_rect.x + child_pos.x,
 					scale_rect.y + child_pos.y
 				);
+
+				
 				
 				//params.painter().draw(draw_line);
 			}
 		}
 
-		g.setColor(Color.LIGHT_GRAY);
-		g.draw(new Rectangle2D.Double(scale_rect.x, scale_rect.y, scale_rect.w, scale_rect.h));
+		//g.setColor(Color.LIGHT_GRAY);
+		//g.draw(new Rectangle2D.Double(scale_rect.x, scale_rect.y, scale_rect.w, scale_rect.h));
+		g.drawImage(get_person().get_image(), (int)scale_rect.x, (int)scale_rect.y, (int)scale_rect.w, (int)scale_rect.h, params.holder());
 
 	}
 
@@ -129,7 +136,12 @@ public class DrawNode implements IDrawObject {
 		return line;
 	}
 
-	static public long calculate_order(String first_name, String last_name) {
+	public String get_search_string(int _option) {
+		return _person.get_first_name() + " " + _person.get_last_name();
+	}
+
+		
+	public static long get_order(String first_name, String last_name) {
 		long order = 0;
 		
 		for (int i=0; i<first_name.length(); i++) {
@@ -140,7 +152,7 @@ public class DrawNode implements IDrawObject {
 		}
 
 		for (int i=0; i<last_name.length(); i++) {
-			Character let = first_name.charAt(i);
+			Character let = last_name.charAt(i);
 			int order_val = let.charValue();
 
 			order += order_val;
@@ -149,10 +161,10 @@ public class DrawNode implements IDrawObject {
 		return order;
 	}
 
-	public long calculate_order() {
+	public long get_order() {
 		Person person = get_person();
 		
-		return calculate_order(person.get_first_name(), person.get_last_name());
+		return get_order(person.get_first_name(), person.get_last_name());
 	}
 
 	@Override
@@ -162,6 +174,22 @@ public class DrawNode implements IDrawObject {
 		_transform.rect.x = position.x;
 		_transform.rect.y = position.y;
 
+	}
+
+	public void set_x(float x) {
+		_transform.rect.x = x;
+	}
+
+	public void set_y(float y) {
+		_transform.rect.y = y;
+	}
+
+	public float get_x() {
+		return _transform.rect.x;
+	}
+
+	public float get_y() {
+		return _transform.rect.y;
 	}
 
 	public void set_initial_position_flag() {
@@ -182,6 +210,14 @@ public class DrawNode implements IDrawObject {
 
 	public Person get_person() {
 		return _person;
+	}
+
+	public void set_search_order_value(long order) {
+		_order_value = order;
+	}
+
+	public long get_search_order_value() {
+		return _order_value;
 	}
 	
 	@Override 

@@ -14,8 +14,6 @@ public class GenericDesktopPanel extends JLayeredPane {
 	public final int GRAB_AREA_FROM_TOP = 30;
 	public final int VERTICAL_DRAG_OFFSET = 65;
 
-	
-
 	private Point _click_distance = new Point();
 	
 	boolean _window_grabbed = false;
@@ -85,9 +83,9 @@ public class GenericDesktopPanel extends JLayeredPane {
 		_tool_bar.add(_exit_button, BorderLayout.EAST);
 
 		//forces title lable to be in the center
-		Component leftSpacer = Box.createHorizontalStrut(_exit_button.getPreferredSize().width);
+		Component left_spacer = Box.createHorizontalStrut(_exit_button.getPreferredSize().width);
 
-		_tool_bar.add(leftSpacer, BorderLayout.WEST);
+		_tool_bar.add(left_spacer, BorderLayout.WEST);
 
 		setBounds (0, 0,
 			(int)(_tool_bar.getPreferredSize().getWidth() + main_panel.getPreferredSize().getWidth()),

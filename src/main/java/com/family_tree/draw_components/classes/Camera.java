@@ -7,6 +7,7 @@ import com.family_tree.math_classes.VSpaceMap;
 
 import com.family_tree.scene_components.*;
 import com.family_tree.util.Util.Pair;
+import java.awt.image.ImageObserver;
 
 import java.awt.*;
 import javax.swing.*;
@@ -33,8 +34,11 @@ public class Camera {
 	private int _objects_rendered = 0;
 	private boolean dog = true;
 
-	public Camera(Scene render_scene, int panel_width, int panel_height) {
+	private ImageObserver _holder;
+
+	public Camera(ImageObserver holder, Scene render_scene, int panel_width, int panel_height) {
 		_render_scene = render_scene;
+		_holder = holder;
 
 		update_win_res(panel_width, panel_height);
 	}
@@ -43,49 +47,21 @@ public class Camera {
 	public void on_draw(Graphics2D painter) {
 		_objects_rendered = 0;
 
-		Iterable<IDrawObject> obj_iterator = _render_scene.get_vmap().get_elements_from_region(_position, _win_width, _win_height, _scale);
+		VSpaceMap vmap = _render_scene.get_vmap();
 
-		for (IDrawObject obj : obj_iterator) {
-			Transform object_transform = obj.get_transform().copy();
-
-			object_transform.rect.subtract_position(_position);
-			object_transform.scale = new Vector2(_scale, _scale);
-
-			IDrawObject.DrawParameters params = new IDrawObject.DrawParameters(painter, _position);
-
-			obj.draw(object_transform, params);
-			_objects_rendered++;
-		}
-			System.out.println("done");
-		/*
-
-
-
-		for (int row_index=0; row_index<_block_rows; row_index++) {
-			for(int column_index=0; column_index<_block_columns; column_index++) {
-				Vector2 pos = new Vector2(
-					_position.x + column_index * _render_scene.get_block_width(),
-					_position.y + row_index * _render_scene.get_block_height()
-				);
-
-				//VSpaceMap.Block block = _render_scene.get_render_block(pos);
-				VSpaceMap.Block block = _render_scene.get_render_block(pos);
-
-				
-				for (IDrawObject obj : block.get_object_list()) {
-					Transform object_transform = obj.get_transform().copy();
-
-					object_transform.rect.subtract_position(_position);
-					object_transform.scale = new Vector2(_scale, _scale);
-
-					IDrawObject.DrawParameters params = new IDrawObject.DrawParameters(painter, _position);
-
-					obj.draw(object_transform, params);
-					_objects_rendered++;
-				}
-			}
-		}
-		*/
+		Iterable<IDrawObject> obj_iterator = vmap.get_elements_from_region(_position, _win_width, _win_height, _scale);
+		
+		 for (IDrawObject obj : obj_iterator) {
+		 	Transform object_transform = obj.get_transform().copy();
+		
+		 	object_transform.rect.subtract_position(_position);
+		 	object_transform.scale = new Vector2(_scale, _scale);
+		
+		 	IDrawObject.DrawParameters params = new IDrawObject.DrawParameters(_holder, painter, _position);
+		
+		 	obj.draw(object_transform, params);
+		 	_objects_rendered++;
+		 }
 	}
 
 	private void validate_position() {
@@ -106,6 +82,10 @@ public class Camera {
 
 	public void set_scale(float ammount) {
 		_scale = Math.clamp(ammount, MIN_ZOOM, MAX_ZOOM);
+	}
+
+	public float get_scale() {
+		return _scale;
 	}
 
 	public void zoom_in() {

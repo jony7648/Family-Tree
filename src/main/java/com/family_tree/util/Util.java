@@ -1,6 +1,7 @@
 package com.family_tree.util;
 
 import java.util.function.BinaryOperator;
+import com.family_tree.math_classes.Geometry.*;
 
 import javax.swing.*;
 
@@ -159,7 +160,7 @@ public class Util {
 
 		Optional<File> optional = new Optional<>();
 		JFileChooser chooser = new JFileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG, PNG, & WEBP", "jpg", "png", "webp");
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG, PNG, & WEBP", file_types);
 		
 		chooser.setFileFilter(filter);	
 
@@ -174,6 +175,28 @@ public class Util {
 		}
 
 		return optional;
+	}
+
+	public static boolean is_colliding(Rect rect1, Rect rect2) {
+		float first_left = rect1.x;
+		float first_right = rect1.x + rect1.w;	
+		float first_top = rect1.y;
+		float first_bottom = rect1.y + rect1.h;
+
+		float second_left = rect2.x;
+		float second_right = rect2.x + rect2.w;	
+		float second_top = rect2.y;
+		float second_bottom = rect2.y + rect2.h;
+
+		return (
+		(
+		 (first_right > second_left && first_left < second_right) ||
+		 (first_left < second_right && first_right > second_left)	
+		) &&
+		(
+		 (first_bottom > second_top && first_bottom < second_bottom) ||
+		 (first_top < second_bottom && first_bottom > second_bottom)
+		));
 	}
 
 

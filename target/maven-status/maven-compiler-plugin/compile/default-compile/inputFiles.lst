@@ -15,6 +15,7 @@
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/jcomponents/DateSelectionField.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/jcomponents/DrawPanel.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/jcomponents/EntryFieldLabel.java
+/Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/jcomponents/EnumButton.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/jcomponents/IJComponentPair.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/jcomponents/JComponentPair.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/jcomponents/interfaces/GenericDesktopPanel.java
@@ -23,9 +24,13 @@
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/math_classes/VSpaceMap.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/panels/MainPanel.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/scene_components/Scene.java
+/Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/scene_components/generic_windows/EditAttributeMenu.java
+/Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/scene_components/generic_windows/NodeCreationWindow.java
+/Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/scene_components/generic_windows/SearchPanel.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/serialized_structures/AppConfig.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/serialized_structures/TreeImage.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/singletons/GeoInfo.java
+/Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/singletons/ImageLoader.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/structures/classes/generic/Queue.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/structures/classes/generic/Stack.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/structures/classes/node_structures/BinarySearchTree.java

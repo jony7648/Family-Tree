@@ -13,6 +13,7 @@ import com.family_tree.structures.classes.node_structures.*;
 import com.family_tree.math_classes.VSpaceMap;
 
 import com.family_tree.draw_components.classes.Camera;
+import com.family_tree.draw_components.interfaces.IDrawObject;
 import com.family_tree.scene_components.*;
 import com.family_tree.jcomponents.DateSelectionField;
 import com.family_tree.jcomponents.interfaces.*;
@@ -20,6 +21,9 @@ import com.family_tree.serialized_structures.*;
 import com.family_tree.data_storage.Person;
 import com.family_tree.singletons.*;
 import com.family_tree.application_menu.*;
+import com.family_tree.scene_components.generic_windows.*;
+import com.family_tree.algorithms.Search;
+import com.family_tree.algorithms.Sort;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -48,149 +52,6 @@ record DebugLine (
 	}
 };
 
-class SearchPanel extends GenericDesktopPanel {
-	enum Signal {
-		NodeSearched
-	}
-
-	public record SignalSearchInfo (
-		String first_name,
-		String last_name,
-		Person.Gender gender,
-		LocalDate start_birth_date,
-		LocalDate end_birth_date,
-		LocalDate start_pass_date,
-		LocalDate end_pass_date,
-		String orgin_country,
-		String orgin_province
-	) {}
-	
-	final String WIN_NAME = "Search Panel";
-
-	public Listener<SearchPanel, Signal> listener = new Listener<>(this, Signal.class);
-		
-	private JPanel _main_panel = new JPanel();
-	private DrawPanel.PaneInfo _pane_info;
-
-	private Dimension _window_bounds = new Dimension(300, 600);
-		
-	
-	private EntryFieldLabel _first_name_pair = new EntryFieldLabel("First Name", "N/A");
-	private EntryFieldLabel _last_name_pair = new EntryFieldLabel("Last Name", "N/A");
-	private JComponentPair<JLabel, JComboBox<Person.Gender>> _gender_field = new JComponentPair<>(new JLabel("Person"), new JComboBox<>(Person.Gender.values()));
-	private JComponentPair<JLabel, JComboBox<String>> _orgin_country_field = new JComponentPair<>(new JLabel("Person"), new JComboBox<String>(GeoInfo.get_country_arr()));
-	private EntryFieldLabel _orgin_province_field = new EntryFieldLabel("Province");
-
-	public JComponentPair<JLabel, DateSelectionField> _birth_day_start_panel = new JComponentPair<> (
-		new GridLayout(2,1),
-		new JLabel("Birth Date Start"),
-		new DateSelectionField()
-	);
-
-	public JComponentPair<JLabel, DateSelectionField> _birth_day_end_panel = new JComponentPair<> (
-		new GridLayout(2,1),
-		new JLabel("Birth Date End"),
-		new DateSelectionField()
-	);
-	
-	JButton _confirm_search_button = new JButton("Search!");
-
-	
-
-	public SearchPanel(DrawPanel.PaneInfo pane_info) {
-		_pane_info = pane_info;
-
-
-		//setUndecorated(true);
-		//setAlwaysOnTop(true);
-		_main_panel.setLayout(new BoxLayout(_main_panel, BoxLayout.Y_AXIS));
-
-		
-
-		_main_panel.add(_first_name_pair);
-		_main_panel.add(_last_name_pair);
-		_main_panel.add(_gender_field);
-		_main_panel.add(_birth_day_start_panel);
-		_main_panel.add(_birth_day_end_panel);
-		_main_panel.add(_orgin_country_field);
-		_main_panel.add(_orgin_province_field);
-		_main_panel.add(_orgin_province_field);
-		_main_panel.add(_confirm_search_button);
-
-		_confirm_search_button.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-		_confirm_search_button.addActionListener(e -> {
-			String first_name = _first_name_pair.get_text_field().getText();
-			String last_name = _last_name_pair.get_text_field().getText();
-			Person.Gender gender = (Person.Gender)_gender_field.component2.getSelectedItem();
-			LocalDate start_birth_date = _birth_day_start_panel.component2.to_localdate();
-			LocalDate end_birth_date = _birth_day_start_panel.component2.to_localdate();
-			LocalDate start_pass_date = null;
-			LocalDate end_pass_date = null;
-			String orgin_country = (String)_orgin_country_field.component2.getSelectedItem();
-			String orgin_province = _orgin_province_field.text_field.getText();
-			
-			
-			Listener.Signal<SearchPanel> signal = new Listener.Signal<SearchPanel>(this, 
-				new SignalSearchInfo(
-					first_name, last_name, gender, start_birth_date, end_birth_date, start_pass_date, end_pass_date, orgin_country, orgin_province)
-			);
-
-			listener.fire_signal(Signal.NodeSearched, signal);
-		});
-
-		panel_to_generic_window(WIN_NAME, _main_panel, pane_info);
-	}
-	
-	@Override
-	protected void paintComponent(Graphics BaseG) {
-		Graphics2D g = (Graphics2D)BaseG;
-		
-		g.setColor(new Color(255, 255, 255));
-		g.fill(new Rectangle2D.Double(0, 0, getWidth(), getHeight()));
-	}
-}
-
-class EditAttribMenu extends GenericDesktopPanel {
-	enum Signal {
-		value_edited
-	}
-
-	public record SignalValueEdited (
-		Object option_value,
-		String value
-	) {}
-	
-	JPanel _main_panel = new JPanel();
-
-	EntryFieldLabel _entry_field = new EntryFieldLabel("Value");
-	JButton _confirm_button = new JButton("Confirm");
-
-	private Object _current_attrib_option;
-
-	Listener<EditAttribMenu, Signal> listener = new Listener<>(this, Signal.class); 
-	
-	public EditAttribMenu(DrawPanel.PaneInfo pane_info) {
-		_main_panel.add(_entry_field);	
-		_main_panel.add(_confirm_button);
-		
-		panel_to_generic_window("Edit Attrib Menu", _main_panel, pane_info);
-
-		_confirm_button.addActionListener(e -> {
-			SignalValueEdited sig_data = new SignalValueEdited(_current_attrib_option, _entry_field.text_field.getText());
-			
-			listener.fire_signal(Signal.value_edited, new Listener.Signal<>(this, sig_data));
-			setVisible(false);
-		});
-	}
-
-	public void prompt_value_change(String old_value, Object edit_option) {
-		_entry_field.text_field.setText(old_value);	
-		_current_attrib_option = edit_option;	
-		setVisible(true);
-	}
-}
-
 class OptionCycler<T> extends JLayeredPane {
 	enum Signal {
 		OptionCycled,
@@ -206,6 +67,7 @@ class OptionCycler<T> extends JLayeredPane {
 	private JButton _left_button = new JButton();	
 	private JButton _right_button = new JButton();	
 	private JLabel _index_label = new JLabel("N/A");
+	Component left_spacer = Box.createHorizontalStrut(_index_label.getPreferredSize().width);
 
 	private PositionalList<T> _option_list = new PositionalList<>();
 
@@ -221,8 +83,11 @@ class OptionCycler<T> extends JLayeredPane {
 		_right_button.addActionListener(e -> {
 			cycle(1);
 		});
+		
 
+		_index_label.setPreferredSize(new Dimension(75, 75));
 		add(_left_button);
+		add(left_spacer, BorderLayout.WEST);
 		add(_index_label);
 		add(_right_button);
 		setLayout(new FlowLayout());
@@ -231,8 +96,12 @@ class OptionCycler<T> extends JLayeredPane {
 		_index_label.setVisible(true);
 		_right_button.setVisible(true);
 
-		setBounds(0,0,200,100);
 		setVisible(false);
+	}
+
+	@Override 
+	public Dimension getPreferredSize() {
+		return new Dimension(400,100);	
 	}
 
 	public void set_list(PositionalList<T> list) {
@@ -241,6 +110,7 @@ class OptionCycler<T> extends JLayeredPane {
 		//reset the cycle index
 		_cycle_index = 0;	
 		cycle(0);
+		System.out.println(_right_button.getSize());
 
 	}
 
@@ -275,10 +145,10 @@ class OptionCycler<T> extends JLayeredPane {
 	public void reposition(Dimension size) {
 		int center_x = (int)size.getWidth() / 2;
 
-		int left_pos = center_x - (int)dimensions.getWidth() / 2;
-		int bottom_pos = (int)(size.getHeight() - dimensions.getHeight());
+		int left_pos = center_x - getPreferredSize().width / 2;
+		int bottom_pos = (int)(size.getHeight() - getPreferredSize().height);
 		
-		setBounds(left_pos, bottom_pos, (int)dimensions.getWidth(), (int)dimensions.getHeight());
+		setBounds(left_pos, bottom_pos, getPreferredSize().width, getPreferredSize().height);
 	}
 }
 
@@ -331,11 +201,10 @@ public class DrawPanel extends JDesktopPane {
 		private Scene _scene;
 		private Camera _camera;
 		private DrawNode _selected_node;
-		
-
 
 		public PlayArea(Scene render_scene) {
-			_camera = new Camera(render_scene, getWidth(), getHeight());
+			_camera = new Camera(this, render_scene, getWidth(), getHeight());
+			_scene = render_scene;
 
 			Timer frameTimer = new Timer(16, this);
 			frameTimer.start();
@@ -346,9 +215,39 @@ public class DrawPanel extends JDesktopPane {
 			addMouseListener(new MouseAdapter(){
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					Vector2 mouse_pos = new Vector2(e.getX(), e.getY());
+					final int MOUSE_WIDTH = 10;
+					final int MOUSE_HEIGHT = 10;
+					
+					Vector2 mouse_screen_pos = new Vector2(e.getX(), e.getY());
+					
+					VSpaceMap vmap = _scene.get_vmap();
 
-					System.out.println(mouse_pos.toString());	
+					Rect mouse_world_rect = new Rect(
+						_camera.get_position().x + mouse_screen_pos.x,
+						_camera.get_position().y + mouse_screen_pos.y,
+						MOUSE_WIDTH,
+						MOUSE_HEIGHT
+					);
+
+					Iterable<IDrawObject> obj_iterator = vmap.get_elements_from_region(_camera);
+					IDrawObject clicked_obj = null;
+
+					for (IDrawObject obj : obj_iterator) {
+						boolean colliding = Util.is_colliding(obj.get_transform().rect, mouse_world_rect);
+
+						if (colliding) {
+							clicked_obj = obj;
+							break;
+						}
+					}
+
+					if (clicked_obj instanceof DrawNode) {
+						DrawNode node = (DrawNode)clicked_obj;
+
+						_selected_node = node;
+						_camera.teleport_to_transform(node.get_transform());
+					}
+
 
 					
 				}
@@ -468,8 +367,8 @@ public class DrawPanel extends JDesktopPane {
 			draw_background(g);
 
 			_camera.on_draw(g);
-
 			draw_debug_info(g);
+
 		}
 
 
@@ -489,18 +388,21 @@ public class DrawPanel extends JDesktopPane {
 	NArrayNode<DrawNode> _draw_root_node;
 	DrawNodeSearchTree _node_search_tree;
 	Scene _scene;
+	JFrame _main_frame;
 	public PlayArea _play_area;	
 	public SearchPanel _search_panel = new SearchPanel(_pane_info);
-	public EditAttribMenu _edit_attrib_menu = new EditAttribMenu(_pane_info);
+	public NodeCreationWindow _node_creation_menu = new NodeCreationWindow(_pane_info);
+	public EditAttributeMenu _edit_attrib_menu = new EditAttributeMenu(_pane_info);
 	public OptionCycler<DrawNode> _option_cycler = new OptionCycler<>();
 
-	public DrawPanel(NArrayNode<DrawNode> root_node, DrawNodeSearchTree search_tree, Dimension win_dimensions, AppConfig app_config) {
+	public DrawPanel(JFrame main_frame, NArrayNode<DrawNode> root_node, DrawNodeSearchTree search_tree, Dimension win_dimensions, AppConfig app_config) {
 		Scene.Parameters scene_parameters = new Scene.Parameters();
 		scene_parameters.block_width = (int)app_config.block_size().x;
 		scene_parameters.block_height = (int)app_config.block_size().y;
 		scene_parameters.region_width = 5000;
 		scene_parameters.region_height = 5000;
 		
+		_main_frame = main_frame;
 		_scene = new Scene(scene_parameters);
 		_play_area = new PlayArea(_scene);
 		_draw_root_node = root_node;
@@ -517,12 +419,14 @@ public class DrawPanel extends JDesktopPane {
 		setOpaque(true);
 		add(_search_panel);
 		add(_edit_attrib_menu);
+		add(_node_creation_menu);
 
 		add(_option_cycler);
 		add(_play_area);	
 
 		apply_input();
-
+	
+		
 		_search_panel.listener.add_receiver(SearchPanel.Signal.NodeSearched, (search_panel, signal) -> {
 			if (!(signal.sig_data instanceof SearchPanel.SignalSearchInfo)) {
 				return;
@@ -531,33 +435,51 @@ public class DrawPanel extends JDesktopPane {
 			SearchPanel.SignalSearchInfo search_info = (SearchPanel.SignalSearchInfo)signal.sig_data;
 			String first_name = search_info.first_name();
 			String last_name = search_info.last_name();
+			final String ERROR_MESSAGE = "Failed to find node!";
 
-			PositionalList<DrawNode> node_list = _node_search_tree.get(first_name, last_name);
-			
+			PositionalList<DrawNode> node_list;
+
+			switch (search_info.search_mode()) {
+				case Exact:
+					node_list = _node_search_tree.get(first_name, last_name);
+					break;
+				case Fuzzy:
+					node_list = _node_search_tree.fuzzy_get(first_name, last_name);
+					break;
+				default:
+					JOptionPane.showMessageDialog(_main_frame, ERROR_MESSAGE);
+					return;
+			}
+
+
+			if (node_list.is_empty()) {
+				JOptionPane.showMessageDialog(_main_frame, ERROR_MESSAGE);
+				return;	
+			}
+
 			_option_cycler.set_list(node_list);
 			_option_cycler.setVisible(true);
+			_search_panel.setVisible(false);
 		});
 
 		_option_cycler.listener.add_receiver(OptionCycler.Signal.OptionCycled, (_option_cycler, signal) -> {
 			if (!(signal.sig_data instanceof OptionCycler.SignalOptionCycled)) {
 				return;
 			}
-			
+
 			@SuppressWarnings("unchecked")
 			OptionCycler<DrawNode>.SignalOptionCycled cycle_result = (OptionCycler<DrawNode>.SignalOptionCycled)signal.sig_data;
 			DrawNode node = cycle_result.object;
 
 			_play_area.get_camera().teleport_to_object(node);
-
-
 		});
 
-		_edit_attrib_menu.listener.add_receiver(EditAttribMenu.Signal.value_edited, (emitter, emit_signal) -> {
-			if (!(emit_signal.sig_data instanceof EditAttribMenu.SignalValueEdited)) {
+		_edit_attrib_menu.listener.add_receiver(EditAttributeMenu.Signal.value_edited, (emitter, emit_signal) -> {
+			if (!(emit_signal.sig_data instanceof EditAttributeMenu.SignalValueEdited)) {
 				return;
 			}
 
-			EditAttribMenu.SignalValueEdited signal = (EditAttribMenu.SignalValueEdited)emit_signal.sig_data;
+			EditAttributeMenu.SignalValueEdited signal = (EditAttributeMenu.SignalValueEdited)emit_signal.sig_data;
 
 			Person.EditMenuOption attrib_menu = (Person.EditMenuOption)signal.option_value();
 			Person person = _play_area.get_selected_person();
@@ -583,10 +505,6 @@ public class DrawPanel extends JDesktopPane {
 	}
 
 	public void edit_node(Person.EditMenuOption edit_option) {
-		switch (edit_option) {
-					
-		}
-
 		Person person = _draw_root_node.get_value().get_person();
 
 		_edit_attrib_menu.prompt_value_change(person.get_value_from_edit_option(edit_option), edit_option);
@@ -600,6 +518,14 @@ public class DrawPanel extends JDesktopPane {
 
 	public PlayArea play_area() {
 		return _play_area;
+	}
+
+	public void display_node_search_menu() {
+		_search_panel.setVisible(true);
+	}
+
+	public void display_node_creation_menu() {
+		_node_creation_menu.setVisible(true);
 	}
 
 	public void apply_input() {

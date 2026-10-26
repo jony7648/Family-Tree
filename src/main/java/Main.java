@@ -70,6 +70,8 @@ public class Main {
 			person.set_orgin_country(Util.access_json_node_property(j_node, Person.ORGIN_COUNTRY_JSON_PROPERTY).asText());
 			person.set_orgin_province(Util.access_json_node_property(j_node, Person.ORGIN_PROVINCE_JSON_PROPERTY).asText());
 			person.set_description(Util.access_json_node_property(j_node, Person.DESCRIPTION_JSON_PROPERTY).asText());
+			person.set_image(Util.access_json_node_property(j_node, Person.PHOTO_JSON_PROPERTY).asText());
+			
 			
 
 			JsonNode child_arr = j_node.get(Person.CHILDREN_JSON_PROPERTY);
@@ -129,7 +131,6 @@ public class Main {
 
 		Dimension win_dimension = new Dimension(600, 600);
 
-		DrawPanel main_panel = new DrawPanel(root_node, node_search_tree, win_dimension, app_config);
 
 
 
@@ -147,8 +148,9 @@ public class Main {
 
 		
 		javax.swing.SwingUtilities.invokeLater(() -> {
-			JMenuBar menu_bar = create_menu_bar(main_panel);
 			JFrame frame = new JFrame(TITLE);
+			DrawPanel main_panel = new DrawPanel(frame, root_node, node_search_tree, win_dimension, app_config);
+			JMenuBar menu_bar = create_menu_bar(main_panel);
 			
 			frame.setSize(win_dimension);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -178,6 +180,20 @@ public class Main {
 		
 		menu_bar.add(new_menu);
 		menu_bar.add(edit_menu);
+		menu_bar.add(history_menu);
+		menu_bar.add(find_menu);
+
+
+		AppBar.create_menu_items(new_menu, AppBarEnums.NewMenuOptions.class, (e, edit_option) -> {
+			switch (edit_option) {
+				case Node -> draw_panel.display_node_creation_menu();
+			}
+		});
+		AppBar.create_menu_items(find_menu, AppBarEnums.FindMenuOptions.class, (e, edit_option) -> {
+			switch (edit_option) {
+				case Nodes -> draw_panel.display_node_search_menu();
+			}
+		});
 
 		return menu_bar;
 	}
