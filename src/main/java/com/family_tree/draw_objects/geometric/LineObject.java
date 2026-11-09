@@ -1,28 +1,22 @@
 package com.family_tree.draw_objects.geometric;
 
 import com.family_tree.draw_components.interfaces.IDrawObject;
+import com.family_tree.draw_components.classes.GenericSceneObject;
+import com.family_tree.draw_components.classes.*;
 import com.family_tree.math_classes.Geometry.*;
 import java.awt.geom.Line2D;
 import java.awt.*;
 
-public class LineObject implements IDrawObject {
-	private Transform _transform;
+public class LineObject extends GenericSceneObject implements IDrawObject {
 	private boolean _v_flip = false;
 	private boolean _h_flip = false;
 
 	public LineObject(Vector2 start, Vector2 end, Vector2 scale) {
-		_transform = new Transform();	
-
-		_transform.scale = scale;
+		set_scale(scale);
 		set_points(start, end);
 	}
 
-	public LineObject() {
-		_transform = new Transform();	
-	}
-
-
-	public void set_points(Vector2 p1, Vector2 p2) {
+	public void set_points(Vector2 p1, Vector2 p2){
 		_v_flip = false;
 		_h_flip = false;
 
@@ -43,7 +37,7 @@ public class LineObject implements IDrawObject {
 			_h_flip = true;
 		}
 
-		_transform.rect = new Rect(left_p.x, top_p.y, width, height);
+		set_rect(left_p.x, top_p.y, width, height);
 	}
 	
 
@@ -71,22 +65,7 @@ public class LineObject implements IDrawObject {
 
 		
 		
-		_transform.rect = new Rect(top_left.x, top_left.y, width, height);
-	}
-
-	public void set_scale(Vector2 scale) {
-		_transform.scale = scale;
-	}
-
-	@Override 
-	public void set_position(Vector2 position){
-		_transform.rect.x = position.x;		
-		_transform.rect.y = position.y;		
-	}
-
-	@Override
-	public Transform get_transform() {
-		return _transform;
+		set_rect(top_left.x, top_left.y, width, height);
 	}
 
 	@Override

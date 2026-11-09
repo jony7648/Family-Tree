@@ -34,7 +34,7 @@ public class NArrayNodeIterator {
 			NArrayNode<T> iter_node = top.node.get_child(top.iter_index);
 			top.iter_index++;
 
-			if (iter_node.is_leaf()) {
+			if (!iter_node.is_leaf()) {
 				IterEntry<T> new_entry = new IterEntry<T>(iter_node);
 
 				_iter_stack.push(new_entry);

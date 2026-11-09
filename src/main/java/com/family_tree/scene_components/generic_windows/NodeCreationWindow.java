@@ -18,21 +18,24 @@ import java.awt.geom.Rectangle2D;
 
 import java.time.LocalDate;
 import java.io.File;
+import java.nio.file.Path;
 
 
 
 public class NodeCreationWindow extends GenericDesktopPanel {
-	enum Signal {
+	public enum Signal {
 		NodeCreated
 	}
 	
-	public record SignalNodeCreated (
-		DrawNode drawnode
+	public static record SignalNodeCreated (
+		Person person,
+		Path image_path
 	) {}
 
 
 		
 	final String WIN_NAME = "Node Creation Window";
+	Path _image_path = Path.of("");
 
 	public Listener<NodeCreationWindow, Signal> listener = new Listener<>(this, Signal.class);
 		
@@ -48,17 +51,18 @@ public class NodeCreationWindow extends GenericDesktopPanel {
 	private JComponentPair<JLabel, JComboBox<String>> _orgin_country_field = new JComponentPair<>(new JLabel("Country"), new JComboBox<String>(GeoInfo.get_country_arr()));
 	private EntryFieldLabel _orgin_province_field = new EntryFieldLabel("Province");
 
-	private JComponentPair<JLabel, DateSelectionField> _birth_day_start_panel = new JComponentPair<> (
+	private JComponentPair<JLabel, DateSelectionField> _birth_day_panel = new JComponentPair<> (
 		new GridLayout(2,1),
-		new JLabel("Birth Date Start"),
+		new JLabel("Date of Birth"),
 		new DateSelectionField()
 	);
 
-	private JComponentPair<JLabel, DateSelectionField> _birth_day_end_panel = new JComponentPair<> (
+	private JComponentPair<JLabel, DateSelectionField> _date_of_passing_panel = new JComponentPair<> (
 		new GridLayout(2,1),
-		new JLabel("Birth Date End"),
+		new JLabel("Date of Passing"),
 		new DateSelectionField()
 	);
+
 
 	private JButton _load_image_button = new JButton("Select photo from disk");
 	
@@ -68,15 +72,17 @@ public class NodeCreationWindow extends GenericDesktopPanel {
 		_first_name_pair,
 		_last_name_pair,
 		_gender_field,
-		_birth_day_start_panel,
-		_birth_day_end_panel,
+		_birth_day_panel,
+		_date_of_passing_panel,
 		_orgin_country_field,
 		_orgin_province_field,
 		_confirm_search_button
 	};
 
 	public NodeCreationWindow(DrawPanel.PaneInfo pane_info) {
+		super(pane_info);
 		_pane_info = pane_info;
+		
 
 		//setUndecorated(true);
 		//setAlwaysOnTop(true);
@@ -85,8 +91,8 @@ public class NodeCreationWindow extends GenericDesktopPanel {
 		_main_panel.add(_first_name_pair);
 		_main_panel.add(_last_name_pair);
 		_main_panel.add(_gender_field);
-		_main_panel.add(_birth_day_start_panel);
-		_main_panel.add(_birth_day_end_panel);
+		_main_panel.add(_birth_day_panel);
+		_main_panel.add(_date_of_passing_panel);
 		_main_panel.add(_orgin_country_field);
 		_main_panel.add(_orgin_province_field);
 		_main_panel.add(_orgin_province_field);
@@ -95,37 +101,45 @@ public class NodeCreationWindow extends GenericDesktopPanel {
 
 		_load_image_button.addActionListener(e -> {
 			String[] file_types = {"jpg", "png", "webp"};
-			
-			Util.Optional<File> image_file = Util.prompt_file("JPG, PNG, & WEBP", file_types);
+
+			Util.Optional<Path> optional = Util.prompt_file("JPG, PNG, & WEBP", file_types);
+
+			if (optional.valid()) {
+				_image_path = optional.value();
+			}
 		});
 
 		_confirm_search_button.addActionListener(e -> {
-			String first_name = _first_name_pair.get_text_field().getText();
-			String last_name = _last_name_pair.get_text_field().getText();
-			Person.Gender gender = (Person.Gender)_gender_field.component2.getSelectedItem();
-			LocalDate start_birth_date = _birth_day_start_panel.component2.to_localdate();
-			LocalDate end_birth_date = _birth_day_start_panel.component2.to_localdate();
-			LocalDate start_pass_date = null;
-			LocalDate end_pass_date = null;
-			String orgin_country = (String)_orgin_country_field.component2.getSelectedItem();
-			String orgin_province = _orgin_province_field.text_field.getText();
+			Person person = new Person();
+			
+			person.set_first_name(_first_name_pair.get_text_field().getText());
+			person.set_last_name(_last_name_pair.get_text_field().getText());
+			person.set_gender((Person.Gender)_gender_field.component2.getSelectedItem());
+			person.set_birth_date(_date_of_passing_panel.component2.to_localdate());
+			person.set_date_of_passing(_date_of_passing_panel.component2.to_localdate());
+			person.set_orgin_country((String)_orgin_country_field.component2.getSelectedItem());
+			person.set_orgin_province(_orgin_province_field.text_field.getText());
+
+			Listener.Signal<NodeCreationWindow> signal = new Listener.Signal<>(this, new SignalNodeCreated(
+				person,
+				_image_path
+			));
+
+			listener.fire_signal(Signal.NodeCreated, signal);
 		});
 
+		_first_name_pair.setAlignmentX(Component.LEFT_ALIGNMENT);
+		_last_name_pair.setAlignmentX(Component.LEFT_ALIGNMENT);
+		_gender_field.setAlignmentX(Component.LEFT_ALIGNMENT);
+		_birth_day_panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		_date_of_passing_panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		_orgin_country_field.setAlignmentX(Component.LEFT_ALIGNMENT);
+		_orgin_province_field.setAlignmentX(Component.LEFT_ALIGNMENT);
+		_orgin_province_field.setAlignmentX(Component.LEFT_ALIGNMENT);
+		_confirm_search_button.setAlignmentX(Component.LEFT_ALIGNMENT);
 
 
-		panel_to_generic_window(WIN_NAME, _main_panel, pane_info);
-
-
-		
-		 _first_name_pair.setAlignmentX(Component.LEFT_ALIGNMENT);
-		 _last_name_pair.setAlignmentX(Component.LEFT_ALIGNMENT);
-		 _gender_field.setAlignmentX(Component.LEFT_ALIGNMENT);
-		 _birth_day_start_panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		 _birth_day_end_panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		 _orgin_country_field.setAlignmentX(Component.LEFT_ALIGNMENT);
-		 _orgin_province_field.setAlignmentX(Component.LEFT_ALIGNMENT);
-		 _orgin_province_field.setAlignmentX(Component.LEFT_ALIGNMENT);
-		 _confirm_search_button.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel_to_generic_window(WIN_NAME, _main_panel);
 	}
 	
 	@Override

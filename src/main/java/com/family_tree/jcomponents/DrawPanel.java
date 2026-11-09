@@ -2,6 +2,7 @@ package com.family_tree.jcomponents;
 
 import com.family_tree.util.Util;
 import com.family_tree.math_classes.Geometry.*;
+import com.family_tree.action_timeline_systems.*;
 
 import com.family_tree.draw_objects.*;
 import com.family_tree.draw_objects.geometric.*;
@@ -14,6 +15,7 @@ import com.family_tree.math_classes.VSpaceMap;
 
 import com.family_tree.draw_components.classes.Camera;
 import com.family_tree.draw_components.interfaces.IDrawObject;
+import com.family_tree.draw_components.classes.GenericSceneObject;
 import com.family_tree.scene_components.*;
 import com.family_tree.jcomponents.DateSelectionField;
 import com.family_tree.jcomponents.interfaces.*;
@@ -29,6 +31,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.Line2D;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -51,6 +54,28 @@ record DebugLine (
 		return message + ": " + value_str;
 	}
 };
+
+class HistoryScrollMenu extends JPopupMenu {
+	HistoryTimeline action_timeline = new HistoryTimeline();
+	JScrollPane scroll_pane = new JScrollPane();
+	JList<HistoryAction> j_list;
+
+	Vector2 spawn_position = new Vector2();
+
+
+	public HistoryScrollMenu(HistoryTimeline action_timeline, int spawn_x, int spawn_y) {
+		j_list = new JList<>(action_timeline.get_list_model());
+
+		setLocation(spawn_x, spawn_y);
+		add(j_list);
+		setVisible(false);
+
+	}
+
+	public Dimension getPreferredSize() {
+		return new Dimension(400,100);	
+	}
+}
 
 class OptionCycler<T> extends JLayeredPane {
 	enum Signal {
@@ -120,12 +145,12 @@ class OptionCycler<T> extends JLayeredPane {
 		}
 		
 		_cycle_index += direction;
-		_cycle_index = Math.clamp(_cycle_index, 0, _option_list.get_size()-1);
+		_cycle_index = Math.clamp(_cycle_index, 0, _option_list.size()-1);
 
 		T ret_obj = _option_list.get(_cycle_index);
 
 		Integer numerator = _cycle_index+1;
-		Integer denomintor = _option_list.get_size();
+		Integer denomintor = _option_list.size();
 
 		String display_text = numerator + "/" + denomintor;
 
@@ -229,7 +254,7 @@ public class DrawPanel extends JDesktopPane {
 						MOUSE_HEIGHT
 					);
 
-					Iterable<IDrawObject> obj_iterator = vmap.get_elements_from_region(_camera);
+					Iterable<GenericSceneObject> obj_iterator = vmap.get_elements_from_region(_camera);
 					IDrawObject clicked_obj = null;
 
 					for (IDrawObject obj : obj_iterator) {
@@ -309,6 +334,10 @@ public class DrawPanel extends JDesktopPane {
 			return _selected_node.get_person();
 		}
 
+		public NArrayNode<DrawNode> get_selected_node() {
+			return _selected_node.get_narray_node();
+		}
+
 		public void set_selected_node(DrawNode node) {
 			_selected_node = node;
 		}
@@ -329,6 +358,7 @@ public class DrawPanel extends JDesktopPane {
 				new DebugLine("Row Count", render_scene.get_block_row_count()),
 				new DebugLine("Column Count", render_scene.get_block_column_count()),
 				new DebugLine("Rendered Objects", _camera.get_rendered_objects_count()),
+				new DebugLine("Images in memory", ImageLoader.size()),
 			};
 
 			for (int i=0; i<debug_line_arr.length; i++) {
@@ -338,6 +368,34 @@ public class DrawPanel extends JDesktopPane {
 
 				g.drawString(debug_line.toString(), 0, draw_height);
 			}
+
+
+			Vector2 block_size = new Vector2(
+				_scene.get_block_width() * _camera.get_scale(),
+				_scene.get_block_height() * _camera.get_scale()
+			);
+
+			int start_vert_draw = (int)_camera.get_position().y % (int)block_size.x;
+			int start_horz_draw = (int)_camera.get_position().x % (int)block_size.y;
+
+			int y_blocks_per_win = 1 + (int)Math.ceilDiv(getSize().height, (int)block_size.x);
+			int x_blocks_per_win = (int)Math.ceilDiv(getSize().width, (int)block_size.y);
+
+			for (int i=0; i<y_blocks_per_win; i++) {
+				int y_pos = i * (int)block_size.y + start_vert_draw;
+				
+				g.setColor(Color.WHITE);
+				g.drawLine(0, y_pos, getSize().width, y_pos);
+			}
+
+			for (int i=0; i<x_blocks_per_win; i++) {
+				int x_pos = i * (int)block_size.x + start_horz_draw;
+				
+				g.setColor(Color.WHITE);
+				g.drawLine(x_pos, 0, x_pos, getSize().height);
+			}
+
+			
 		}
 
 		public void draw_background(Graphics2D g) {
@@ -383,6 +441,14 @@ public class DrawPanel extends JDesktopPane {
 		}
 	}
 
+	public record Parameters(
+		JFrame main_frame, 
+		NArrayNode<DrawNode> root_node, 
+		DrawNodeSearchTree search_tree, 
+		Dimension win_dimensions,
+		HistoryTimeline history_timeline
+	) {}
+
 	
 	private PaneInfo _pane_info = new PaneInfo(this);
 	NArrayNode<DrawNode> _draw_root_node;
@@ -394,27 +460,29 @@ public class DrawPanel extends JDesktopPane {
 	public NodeCreationWindow _node_creation_menu = new NodeCreationWindow(_pane_info);
 	public EditAttributeMenu _edit_attrib_menu = new EditAttributeMenu(_pane_info);
 	public OptionCycler<DrawNode> _option_cycler = new OptionCycler<>();
+	public HistoryScrollMenu _history_scroll_menu;
 
-	public DrawPanel(JFrame main_frame, NArrayNode<DrawNode> root_node, DrawNodeSearchTree search_tree, Dimension win_dimensions, AppConfig app_config) {
+	public DrawPanel(Parameters param, AppConfig app_config) {
 		Scene.Parameters scene_parameters = new Scene.Parameters();
 		scene_parameters.block_width = (int)app_config.block_size().x;
 		scene_parameters.block_height = (int)app_config.block_size().y;
-		scene_parameters.region_width = 5000;
-		scene_parameters.region_height = 5000;
-		
-		_main_frame = main_frame;
+		scene_parameters.region_width = 10000;
+		scene_parameters.region_height = 10000;
+
 		_scene = new Scene(scene_parameters);
 		_play_area = new PlayArea(_scene);
-		_draw_root_node = root_node;
-		_node_search_tree = search_tree;
+		_history_scroll_menu = new HistoryScrollMenu(param.history_timeline, 0, 0);
+
+		
+		_main_frame = param.main_frame();
+		_draw_root_node = param.root_node();
+		_node_search_tree = param.search_tree();
 		_play_area.set_selected_node(_draw_root_node.get_value());
 		
-		_play_area.setBounds(0, 0, (int)win_dimensions.getWidth(), (int)win_dimensions.getHeight());
+		_play_area.setBounds(0, 0, (int)param.win_dimensions().getWidth(), (int)param.win_dimensions().getHeight());
 
 		TreeAligner.setup_draw_nodes(_scene, _draw_root_node);		
 		
-
-			
 		setVisible(true);
 		setOpaque(true);
 		add(_search_panel);
@@ -422,6 +490,7 @@ public class DrawPanel extends JDesktopPane {
 		add(_node_creation_menu);
 
 		add(_option_cycler);
+		add(_history_scroll_menu);
 		add(_play_area);	
 
 		apply_input();
@@ -474,6 +543,21 @@ public class DrawPanel extends JDesktopPane {
 			_play_area.get_camera().teleport_to_object(node);
 		});
 
+		_node_creation_menu.listener.add_receiver(NodeCreationWindow.Signal.NodeCreated, (emitter, emit_signal) -> {
+			if (!(emit_signal.sig_data instanceof NodeCreationWindow.SignalNodeCreated)) {
+				return;
+			}
+
+			NodeCreationWindow.SignalNodeCreated signal = (NodeCreationWindow.SignalNodeCreated)emit_signal.sig_data;
+
+			Person person = signal.person();
+			
+
+			System.out.println(person);
+			TreeAligner.insert_node(_scene, _play_area.get_selected_node(), signal);
+			
+		});
+
 		_edit_attrib_menu.listener.add_receiver(EditAttributeMenu.Signal.value_edited, (emitter, emit_signal) -> {
 			if (!(emit_signal.sig_data instanceof EditAttributeMenu.SignalValueEdited)) {
 				return;
@@ -510,8 +594,6 @@ public class DrawPanel extends JDesktopPane {
 		_edit_attrib_menu.prompt_value_change(person.get_value_from_edit_option(edit_option), edit_option);
 	}
 
-	
-
 	public void give_focus_to_play_area() {
 		_play_area.requestFocusInWindow();
 	}
@@ -526,6 +608,15 @@ public class DrawPanel extends JDesktopPane {
 
 	public void display_node_creation_menu() {
 		_node_creation_menu.setVisible(true);
+	}
+
+	public void show_history_menu(Point point) {
+		_history_scroll_menu.setLocation(point);
+		_history_scroll_menu.setVisible(true);
+	}
+
+	public void hide_history_menu() {
+		_history_scroll_menu.setVisible(false);
 	}
 
 	public void apply_input() {

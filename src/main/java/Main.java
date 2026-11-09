@@ -2,11 +2,15 @@ import com.family_tree.panels.*;
 
 import javax.swing.*;
 import java.awt.event.*;
+import javax.swing.event.MenuListener;
+import javax.swing.event.MenuEvent;
 import java.awt.Dimension;
+import java.awt.Point;
 
 import java.util.ArrayList;
 import java.util.List;
 import com.family_tree.util.*;
+import com.family_tree.action_timeline_systems.*;
 import com.family_tree.structures.classes.node_structures.*;
 import com.family_tree.structures.interfaces.*;
 import com.family_tree.structures.classes.generic.*;
@@ -26,6 +30,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 
 import java.io.File;
+import java.nio.file.Path;
+
 
 /*
 
@@ -39,7 +45,6 @@ public class Main {
 	private static NArrayNode<DrawNode> create_tree(JsonNode j_node) {
 		NArrayNode<DrawNode> root_node = new NArrayNode<>(new DrawNode());
 		root_node.get_value().assign_to_root();
-
 
 		if (j_node == null || j_node.isArray() == false) {
 			return root_node;	
@@ -70,7 +75,7 @@ public class Main {
 			person.set_orgin_country(Util.access_json_node_property(j_node, Person.ORGIN_COUNTRY_JSON_PROPERTY).asText());
 			person.set_orgin_province(Util.access_json_node_property(j_node, Person.ORGIN_PROVINCE_JSON_PROPERTY).asText());
 			person.set_description(Util.access_json_node_property(j_node, Person.DESCRIPTION_JSON_PROPERTY).asText());
-			person.set_image(Util.access_json_node_property(j_node, Person.PHOTO_JSON_PROPERTY).asText());
+			draw_node.load_image(Path.of(Util.access_json_node_property(j_node, Person.PHOTO_JSON_PROPERTY).asText()));
 			
 			
 
@@ -94,6 +99,35 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
+		PositionalList<Integer> list = new PositionalList<>();	
+
+		for (int i=0; i<10; i++) {
+			list.append(i+1);
+		}
+
+		list.remove(2);
+		list.insert(0, 99);
+		Integer int_63 = 63;
+		PositionalList<Integer>.Node pos = list.prepend(int_63);
+		list.add_after(pos, 55);
+		list.remove_tail();
+		list.set(2, 15445);
+
+
+		PositionalList<Integer>.Node after = list.get_node(new Integer(9));
+		Integer after_val = list.get_prev_value(after);
+		System.out.println(list.size());
+
+
+		System.out.println("------list-----");
+		for (Integer num : list) {
+			
+			System.out.println(num);
+		}
+		 //if(true) {return;};
+
+
+		
 		final String TITLE = "Family Tree";
 
 		final String CONFIG_FILE_PATH = "config.toml";
@@ -103,8 +137,17 @@ public class Main {
 
 		NArrayNode<DrawNode> root_node;
 		DrawNodeSearchTree node_search_tree = new DrawNodeSearchTree();
+		HistoryTimeline history_timeline = new HistoryTimeline();
 
 		GeoInfo.load_country_file("assets/app_info/countries.txt");
+		
+		try {
+			ImageLoader.init();
+		}
+		catch (Exception e){
+			e.printStackTrace();
+			System.exit(1);
+		}
 
 		
 		TomlMapper toml_mapper = new TomlMapper();
@@ -149,15 +192,21 @@ public class Main {
 		
 		javax.swing.SwingUtilities.invokeLater(() -> {
 			JFrame frame = new JFrame(TITLE);
-			DrawPanel main_panel = new DrawPanel(frame, root_node, node_search_tree, win_dimension, app_config);
+			DrawPanel.Parameters draw_param = new DrawPanel.Parameters(
+				frame, 
+				root_node, 
+				node_search_tree, 
+				win_dimension, 
+				history_timeline
+			);
+			
+			DrawPanel main_panel = new DrawPanel(draw_param, app_config);
 			JMenuBar menu_bar = create_menu_bar(main_panel);
 			
 			frame.setSize(win_dimension);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.add(main_panel);
 
-		
-			
 			frame.setJMenuBar(menu_bar);
 			
 			frame.setVisible(true);
@@ -173,6 +222,25 @@ public class Main {
 		JMenu history_menu = new JMenu("History");
 		JMenu find_menu = new JMenu("Find");
 
+		history_menu.addMenuListener(new MenuListener() {
+			
+			public void menuSelected(MenuEvent e) {
+				Point point = new Point(
+					history_menu.getLocation().x,
+					history_menu.getLocation().y + 30
+				);
+				
+				draw_panel.show_history_menu(point);
+			}
+
+			public void menuDeselected(MenuEvent e) {
+				draw_panel.hide_history_menu();
+			}
+
+			public void menuCanceled(MenuEvent e) {
+				
+			}
+		});
 		
 		AppBar.create_menu_items(edit_menu, Person.EditMenuOption.class, (e, edit_option) -> {
 			draw_panel.edit_node(edit_option);

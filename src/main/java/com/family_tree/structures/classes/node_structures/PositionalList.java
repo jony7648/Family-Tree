@@ -5,12 +5,21 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class PositionalList<T> implements Iterable<T> {
-	Node _head;
-	Node _tail;
+	//positional list for the hashmap
+	Node _head = new Node(null, null, null);
+	Node _tail = new Node(null, null, null);
 	int _size = 0;
 
 	public class ListIterator implements Iterator<T> {
-		Node node = _head;
+		Node node = _head.next;
+
+		public ListIterator() {}
+
+		public ListIterator(Node start_node) {
+			if (start_node.is_valid()) {
+				node = start_node;
+			}
+		}
 
 		public T next() {
 			Node old_node = node;
@@ -20,7 +29,22 @@ public class PositionalList<T> implements Iterable<T> {
 		}
 
 		public boolean hasNext() {
-			return node != null;
+			return node != _tail;
+		}
+	}
+
+	public class NodeIterator implements Iterator<Node> {
+		Node node = _head.next;
+
+		public Node next() {
+			Node old_node = node;
+			node = node.get_next();
+
+			return old_node;
+		}
+
+		public boolean hasNext() {
+			return node != _tail;
 		}
 	}
 	
@@ -42,7 +66,7 @@ public class PositionalList<T> implements Iterable<T> {
 		private Node get_prev() {
 			return prev;
 		}
-		public Node get_next() {
+		private Node get_next() {
 			return next;
 		}
 		private void set_value(T value) {
@@ -55,16 +79,8 @@ public class PositionalList<T> implements Iterable<T> {
 		private void set_prev(Node prev) {
 			this.prev = prev;
 		}
-		private boolean has_prev() {
-			return prev != null;
-		}
-
-		private boolean has_next() {
-			return next != null;
-		}
 
 		private void clear() {
-			prev = null;
 			next = null;
 		}
 
@@ -73,52 +89,55 @@ public class PositionalList<T> implements Iterable<T> {
 		}
 	}
 
-	public PositionalList() {}
+	public PositionalList() {
+		_head.next = _tail;
+		_tail.prev = _head;
+	}
 
 	public PositionalList(T[] items) {
+		this();
+		
 		for (T item : items) {
 			append(item);
 		}
 	}
 
-	public void append(T value) {
+	public Node append(T value) {
 		_size++;
 		
-		if (_size == 1) {
-			_tail = new Node(null, value, null);
-			_head = _tail;
-			return;
-		}
+		Node prev = _tail.prev;
+		Node new_node = new Node(prev, value, _tail);
 
-		
-		_tail.set_next(new Node(_tail, value, null));
-		_tail = _tail.get_next();
-		
+		prev.next = new_node;
+		_tail.prev = new_node;
+
+		return new_node;
 	}
 
-	public void prepend(T value) {
+	public Node prepend(T value) {
 		_size++;
+		
+		Node next = _head.next;
+		Node new_node = new Node(_head, value, next);
 
-		if (_size == 1) {
-			_tail = new Node(null, value, null);
-			_head = _tail;
-			return;
-		}
+		_head.next = new_node;
+		next.prev = new_node;
 
-		_head.set_prev(new Node(null, value, _head));
-		_head = _head.get_prev();
+		return new_node;
 	}
 
-	public void add_between(Node prev, T value) {
+	public void add_after(Node prev, T value) throws IllegalStateException {
+		if (!prev.is_valid()) {
+			throw new IllegalStateException("This node is not valid!");
+		}
+
+		_size++;
+		
 		Node next = prev.get_next();	
 		
 		Node new_node = new Node(prev, value, next);	
 		prev.set_next(new_node);
-		
-		//incase we are at the last position
-		if (next != null) {
-			next.set_prev(new_node);
-		}
+		next.set_prev(new_node);
 	}
 
 	public void insert(int index, T value) throws IndexOutOfBoundsException {
@@ -126,15 +145,14 @@ public class PositionalList<T> implements Iterable<T> {
 			throw new IndexOutOfBoundsException("Inserting past linked list bounds!");
 		}
 
-		_size++;
-
 		Node curr_node = _head;
 
 		for (int i=0; i<index-1; i++) {
 			curr_node = curr_node.get_next();
 		}
 
-		add_between(curr_node, value);
+		//size gets incremented in the add_after method
+		add_after(curr_node, value);
 	}
 
 	public T remove_tail() throws NoSuchElementException {
@@ -143,36 +161,58 @@ public class PositionalList<T> implements Iterable<T> {
 		}
 
 		_size--;
-
 		
-		Node old_tail = _tail;
+		Node last_node = _tail.get_prev();
+		Node new_last = last_node.prev;
 
-		if (_size == 0) {
-			_head = null;
-			_tail = null;
-			return old_tail.get_value();
+		new_last.next = _tail;
+		_tail.prev = new_last;
+			
+		return last_node.get_value();
+	}
+
+	public void remove_all_after(Node node) {
+		if (node.is_valid() == false || _size == 0) {
+			return;
 		}
 
+		Node it_node = node.next;
 
-		_tail = _tail.get_prev();
-			
-		return old_tail.get_value();
+		while (it_node != _tail) {
+			Node tmp = it_node;
+			it_node = it_node.next;	
+
+			tmp.clear();
+			_size--;
+		}
+		
+		_tail.prev = node;
+		node.next = _tail;
+		
 	}
 
 	public T get_head() {
-		return _head.get_value();
+		return _head.next.get_value();
 	}
 
 	public Node get_head_node() {
-		return _head;
+		if (_size == 0) {
+			return null;
+		}
+		
+		return _head.next;
 	}
 
 	public T get_tail() {
-		return _tail.get_value();
+		return _tail.prev.get_value();
 	}
 
 	public Node get_tail_node() {
-		return _tail;
+		if (_size == 0) {
+			return null;
+		}
+		
+		return _tail.prev;
 	}
 
 	public T set(int index, T value) throws NoSuchElementException {
@@ -180,11 +220,12 @@ public class PositionalList<T> implements Iterable<T> {
 			throw new NoSuchElementException("Index is not valid");
 		}
 
-		Node curr_node = _head;
+		Node curr_node = _head.next;
 
 		for (int i=0; i<index; i++) {
 			curr_node = curr_node.get_next();	
 		}
+
 
 		T old_value = curr_node.value;
 		curr_node.value = value;
@@ -193,6 +234,10 @@ public class PositionalList<T> implements Iterable<T> {
 	}
 
 	public T set(Node node, T value) {
+		if (!node.is_valid()) {
+			return null;
+		}
+		
 		T old_value = node.value;
 		node.value = value;
 
@@ -206,7 +251,7 @@ public class PositionalList<T> implements Iterable<T> {
 			throw new IndexOutOfBoundsException("Trying to access past list bounds!");
 		}
 
-		Node curr_node = _head;
+ 		Node curr_node = _head.next;
 
 		for (int i=0; i<index; i++) {
 			curr_node = curr_node.get_next();	
@@ -216,10 +261,15 @@ public class PositionalList<T> implements Iterable<T> {
 	}
 
 	public Node get_node(T obj) throws IndexOutOfBoundsException {
-		Node curr_node = _head;
+		Node curr_node = _head.next;
 
 		//loop till the size so if we can't find the node the curr_node will be null
 		for (int i=0; i<_size; i++) {
+			Object value = curr_node.get_value();
+			
+			if (obj.equals(value)) {
+				break;
+			}
 			curr_node = curr_node.get_next();	
 		}
 
@@ -231,11 +281,16 @@ public class PositionalList<T> implements Iterable<T> {
 	}
 
 	public T get(int index) throws IndexOutOfBoundsException {
-		return get_node(index).get_value();
+		Node node = get_node(index);
+
+		if (node == null) {
+			return null;
+		}
+		
+		return node.get_value();
 	}
 
-
-	public T remove_node(Node remove_node) throws IllegalStateException {
+	public T remove(Node remove_node) throws IllegalStateException {
 		if (!remove_node.is_valid()) {
 			throw new IllegalStateException("This is not a valid list node!");
 		}
@@ -255,23 +310,33 @@ public class PositionalList<T> implements Iterable<T> {
 	}
 
 	public T remove(int index) {
-		return remove_node(get_node(index));	
+		return remove(get_node(index));	
 	}
 
 	public T remove(T obj) {
-		return remove_node(get_node(obj));	
-	}
+		Node node = get_node(obj);
 
-	public Node get_next_node(Node node) throws NoSuchElementException {
-		if (node.has_next() == false) {
-			throw new IndexOutOfBoundsException("Trying to access past list bounds!");
+		if (node == null) {
+			return null;
 		}
 		
+		return remove(get_node(obj));	
+	}
+
+	public Node get_next_node(Node node) {
+		if (node_has_next(node) == false) {
+			return null;
+		}
+
+		if (!node.is_valid()) {
+			return null;
+			
+		}
 		return node.get_next();	
 	}
 
 	public Node get_prev_node(Node node) throws NoSuchElementException {
-		if (node.has_prev() == false) {
+		if (node_has_prev(node) == false) {
 			throw new IndexOutOfBoundsException("Trying to access past list bounds!");
 		}
 		
@@ -286,9 +351,7 @@ public class PositionalList<T> implements Iterable<T> {
 		return get_prev_node(node).get_value();	
 	}
 
-	
-
-	public int get_size() {
+	public int size() {
 		return _size;
 	}
 
@@ -298,5 +361,19 @@ public class PositionalList<T> implements Iterable<T> {
 
 	public Iterator<T> iterator() {
 		return new ListIterator();
+	}
+
+	public Iterator<T> iterator(Node node) {
+		return new ListIterator(node);
+	}
+
+	
+
+	public boolean node_has_next(Node node) {
+		return node.next != _tail;
+	}
+
+	public boolean node_has_prev(Node node) {
+		return node.prev != _head;
 	}
 }

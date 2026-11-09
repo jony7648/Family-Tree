@@ -49,7 +49,7 @@ public class Camera {
 
 		VSpaceMap vmap = _render_scene.get_vmap();
 
-		Iterable<IDrawObject> obj_iterator = vmap.get_elements_from_region(_position, _win_width, _win_height, _scale);
+		Iterable<GenericSceneObject> obj_iterator = vmap.get_elements_from_region(_position, _win_width, _win_height, _scale);
 		
 		 for (IDrawObject obj : obj_iterator) {
 		 	Transform object_transform = obj.get_transform().copy();
@@ -89,11 +89,13 @@ public class Camera {
 	}
 
 	public void zoom_in() {
+		validate_position();
 		set_scale(_scale + ZOOM_FACTOR);
 		update_win_res(_win_width, _win_height);
 	}
 
 	public void zoom_out() {
+		validate_position();
 		set_scale(_scale - ZOOM_FACTOR);
 		update_win_res(_win_width, _win_height);
 	}

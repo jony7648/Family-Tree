@@ -6,9 +6,10 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.geom.Rectangle2D;
 import com.family_tree.jcomponents.DrawPanel;
+import com.family_tree.constants.*;
 
 public class GenericDesktopPanel extends JLayeredPane {
-	public final String EXIT_BUTTON_IMAGE_PATH = "assets/virtual-desktop/exit-button.png";
+	public final String EXIT_BUTTON_IMAGE_PATH = DirPaths.VIRTUAL_DEKSOP_IMAGES_DIR + "/exit-button.png";
 	public final ImageIcon EXIT_BUTTON_IMAGE = new ImageIcon(EXIT_BUTTON_IMAGE_PATH);
 	
 	public final int GRAB_AREA_FROM_TOP = 30;
@@ -31,10 +32,13 @@ public class GenericDesktopPanel extends JLayeredPane {
 	
 	//final static Color TOOL_TIP_COLOR = new Color(36,65,249);
 
-	public void panel_to_generic_window(String win_name, JComponent main_panel, DrawPanel.PaneInfo pane_info) {
+	public GenericDesktopPanel(DrawPanel.PaneInfo pane_info) {
+		_pane_info = pane_info;
+	}
+	
+	public void panel_to_generic_window(String win_name, JComponent main_panel) {
 		//we should add the main panel to gbc to allow for tool bar	
 		setBorder(DEFAULT_BORDER);
-		_pane_info = pane_info;
 
 		_title_lable = new JLabel(win_name);
 		_exit_button.setIcon(EXIT_BUTTON_IMAGE);
@@ -98,7 +102,7 @@ public class GenericDesktopPanel extends JLayeredPane {
 				Point mouse_pos = SwingUtilities.convertPoint(
 					e.getComponent(), 
 					e.getPoint(),    
-					pane_info.get_pane()
+					_pane_info.get_pane()
 				);
 
 				
@@ -120,15 +124,15 @@ public class GenericDesktopPanel extends JLayeredPane {
 				Point mouse_pos = SwingUtilities.convertPoint(
 					e.getComponent(), 
 					e.getPoint(),    
-					pane_info.get_pane()
+					_pane_info.get_pane()
 				);
 
 				final int FORGIVENESS = 10;
 
 				int left_border = FORGIVENESS;
-				int right_border = (int)pane_info.get_win_size().getWidth() - FORGIVENESS;
+				int right_border = (int)_pane_info.get_win_size().getWidth() - FORGIVENESS;
 				int top_border = FORGIVENESS;
-				int bottom_border = (int)pane_info.get_win_size().getHeight() - FORGIVENESS;
+				int bottom_border = (int)_pane_info.get_win_size().getHeight() - FORGIVENESS;
 						
 				mouse_pos.x = Math.clamp(mouse_pos.x, left_border, right_border);
 				mouse_pos.y = Math.clamp(mouse_pos.y, top_border, bottom_border);
@@ -144,5 +148,20 @@ public class GenericDesktopPanel extends JLayeredPane {
 		});
 	}
 
+
+	@Override
+	public void setVisible(boolean state) {
+		//ensure that the window is centered in the window when displaying it
+		super.setVisible(state);
+
+		JDesktopPane panel = _pane_info.get_pane();	
 		
+		Point panel_size = new Point(panel.getWidth(), panel.getHeight());
+		
+		
+		setLocation(
+			panel_size.x / 2 - getWidth() / 2,
+			panel_size.y / 2 - getHeight() / 2
+		);
+	}
 }

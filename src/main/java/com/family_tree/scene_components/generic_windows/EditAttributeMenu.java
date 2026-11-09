@@ -38,10 +38,13 @@ public class EditAttributeMenu extends GenericDesktopPanel {
 	public Listener<EditAttributeMenu, Signal> listener = new Listener<>(this, Signal.class); 
 	
 	public EditAttributeMenu(DrawPanel.PaneInfo pane_info) {
+		super(pane_info);
+
+		panel_to_generic_window("Edit Attrib Menu", _main_panel);
+		
 		_main_panel.add(_entry_field);	
 		_main_panel.add(_confirm_button);
 		
-		panel_to_generic_window("Edit Attrib Menu", _main_panel, pane_info);
 
 		_confirm_button.addActionListener(e -> {
 			SignalValueEdited sig_data = new SignalValueEdited(_current_attrib_option, _entry_field.text_field.getText());
@@ -49,6 +52,8 @@ public class EditAttributeMenu extends GenericDesktopPanel {
 			listener.fire_signal(Signal.value_edited, new Listener.Signal<>(this, sig_data));
 			setVisible(false);
 		});
+
+		
 	}
 
 	public void prompt_value_change(String old_value, Object edit_option) {

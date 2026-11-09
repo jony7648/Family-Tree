@@ -76,6 +76,7 @@ public class SearchPanel extends GenericDesktopPanel {
 	);
 	
 	public SearchPanel(DrawPanel.PaneInfo pane_info) {
+		super(pane_info);
 		_pane_info = pane_info;
 
 		//setUndecorated(true);
@@ -131,7 +132,7 @@ public class SearchPanel extends GenericDesktopPanel {
 		_orgin_province_field.setAlignmentX(Component.LEFT_ALIGNMENT);
 		_confirm_search_button_pair.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-		panel_to_generic_window(WIN_NAME, _main_panel, pane_info);
+		panel_to_generic_window(WIN_NAME, _main_panel);
 	}
 
 	@Override

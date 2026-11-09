@@ -56,7 +56,7 @@ public class Search {
 		}
 
 		
-		search_sort(search, entry_list, 0, entry_list.get_size());
+		search_sort(search, entry_list, 0, entry_list.size());
 
 
 		for (DrawNode node : entry_list) {

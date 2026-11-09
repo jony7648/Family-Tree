@@ -2,6 +2,7 @@ package com.family_tree.scene_components;
 
 import com.family_tree.math_classes.VSpaceMap;
 import com.family_tree.draw_components.interfaces.IDrawObject;
+import com.family_tree.draw_components.classes.GenericSceneObject;
 import com.family_tree.math_classes.Geometry.*;
 import com.family_tree.math_classes.VSpaceMap;
 
@@ -24,11 +25,11 @@ public class Scene {
 		vspacemap = new VSpaceMap(param.region_width, param.region_height, param.block_width, param.block_height);
 	}
 
-	public void add_object(IDrawObject obj) {
+	public void add_object(GenericSceneObject obj) {
 		vspacemap.add(obj);	
 	}
 
-	public void remove_object(IDrawObject obj) {
+	public void remove_object(GenericSceneObject obj) {
 		vspacemap.remove(obj);	
 	}
 
