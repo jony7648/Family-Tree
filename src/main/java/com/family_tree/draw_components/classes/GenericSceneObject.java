@@ -106,7 +106,10 @@ public class GenericSceneObject implements IDrawObject {
 		return _transform.rect.y;
 	}
 
-	
+	public float get_right_x() {
+		//does not apply scalling
+		return _transform.rect.x + _transform.rect.w;
+	}
 
 	public Vector2 get_position() {
 		return new Vector2(_transform.rect.x, _transform.rect.y);

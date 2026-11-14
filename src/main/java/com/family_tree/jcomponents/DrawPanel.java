@@ -352,6 +352,9 @@ public class DrawPanel extends JDesktopPane {
 			Scene render_scene = _camera.get_render_scene();
 			VSpaceMap vspacemap = _camera.get_render_scene().get_vmap();
 
+			Rect pos_rect = new Rect(_camera.get_position().x, _camera.get_position().y, 1, 1);
+		
+
 			DebugLine debug_line_arr[] = {
 				new DebugLine("Cam Pos", _camera.get_position()),
 				new DebugLine("Curr Block", vspacemap.position_to_row_column_pair(_camera.get_position()).toString()),
@@ -359,6 +362,8 @@ public class DrawPanel extends JDesktopPane {
 				new DebugLine("Column Count", render_scene.get_block_column_count()),
 				new DebugLine("Rendered Objects", _camera.get_rendered_objects_count()),
 				new DebugLine("Images in memory", ImageLoader.size()),
+				new DebugLine("Objects in curr block", Util.get_unpacked_arr_str(vspacemap.get_arr_of_occupied_blocks(pos_rect))),
+				new DebugLine("Blocks of selected obj", Util.get_unpacked_arr_str(vspacemap.get_arr_of_occupied_blocks(_selected_node.get_transform().get_scale_rect()))),
 			};
 
 			for (int i=0; i<debug_line_arr.length; i++) {

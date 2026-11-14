@@ -7,15 +7,20 @@ import com.family_tree.draw_components.classes.Camera;
 import com.family_tree.draw_components.classes.GenericSceneObject;
 import com.family_tree.data_storage.Person;
 import com.family_tree.draw_objects.DrawNode;
+import com.family_tree.util.*;
 
 import java.awt.*;
 import java.util.Iterator;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Line2D;
 
+import java.util.Arrays;
+
 import java.util.Iterator;
 
 public class VSpaceMap {
+	public record IntPair(int num1, int num2) {};
+	
 	public class ObjectIterator implements Iterator<GenericSceneObject> {
 		int _render_rows_count = 0;
 		int _render_columns_count = 0;
@@ -155,6 +160,10 @@ public class VSpaceMap {
 		public int get_index() {
 			return _index;
 		}
+
+		@Override public String toString() {
+			return Integer.toString(_index);
+		}
 	}
 
 	public static class RowColumnPair {
@@ -198,8 +207,6 @@ public class VSpaceMap {
 				_BLOCK_ARR[i][j] = block;
 			}
 		}
-
-	
 	}
 
 	public RowColumnPair position_to_row_column_pair(I2DSpace space) throws IndexOutOfBoundsException {
@@ -231,10 +238,10 @@ public class VSpaceMap {
 		Block[][] block_arr = new Block[y_block_count][x_block_count];
 		
 		for (int x_index=0; x_index<x_block_count; x_index++) {
-			copy_rect.x += x_index * BLOCK_WIDTH;
+			copy_rect.x = obj_rect.x + (x_index * BLOCK_WIDTH);
 			
 			for (int y_index=0; y_index<y_block_count; y_index++) {
-				copy_rect.y += y_index * BLOCK_HEIGHT;
+				copy_rect.y = obj_rect.y + (y_index * BLOCK_HEIGHT);
 				Block block = access(copy_rect);
 
 				block_arr[y_index][x_index] = block;
@@ -253,90 +260,15 @@ public class VSpaceMap {
 			}
 		}
 
+		//adjust blocks when the object moves
 		obj.get_generic_object_listener().add_receiver(GenericSceneObject.Signal.TransformChanged, (holder, emit_signal) -> {
 			if (!(emit_signal.sig_data instanceof GenericSceneObject.SignalTransformChanged)) {
 				return;
 			}
 
-			if (obj instanceof DrawNode) {
-				DrawNode node = (DrawNode)obj;
-
-				String name = node.get_person().get_first_name();
-
-				if (name.equals("Red")) {
-					for (Block[] row : get_arr_of_occupied_blocks(node.get_transform().get_scale_rect())) {
-						for (Block block : row) {
-							System.out.println(block.get_index());
-						}
-					}
-				}
-			}
-
 			GenericSceneObject.SignalTransformChanged signal = (GenericSceneObject.SignalTransformChanged)emit_signal.sig_data;
 			
-			Block new_block = access(obj.get_transform());	
-			Block[][] new_block_arr = get_arr_of_occupied_blocks(obj.get_transform().get_scale_rect());
-
-			
-			int new_row_count = new_block_arr.length;
-			int new_column_count = new_block_arr[0].length;
-
-			int new_region_left = get_block_column(new_block_arr[0][0]);
-			int new_region_bottom = get_block_row(new_block_arr[new_block_arr.length-1][0]);
-			
-			int new_block_top_left_id = new_block_arr[0][0].get_index() % _BLOCK_COLUMN_COUNT;
-			int new_block_bottom_right_id = new_block_arr[new_row_count-1][new_column_count-1].get_index() % _BLOCK_COLUMN_COUNT;
-
-			Rect old_obj_rect = signal.old_rect();
-			Block[][] old_block_arr  = get_arr_of_occupied_blocks(old_obj_rect);
-			
-			int old_region_bottom = get_block_row(old_block_arr[old_block_arr.length-1][0]);
-			int old_region_left = get_block_column(old_block_arr[0][0]);
-			int old_row_count = old_block_arr.length;
-			int old_column_count = old_block_arr[old_row_count-1].length;
-			int old_top_left_id = old_block_arr[0][0].get_index();
-			int old_bottom_right_id = old_block_arr[old_row_count-1][old_column_count-1].get_index();
-			
-			//
-			// //int left_collision_id = (int)Math.floorMod(new_region_left - old_region_left, column_count);
-			// //int top_collision_id = (int)Math.floorMod(new_region_bottom - old_region_bottom, row_count);
-			//
-			// //rewrite this so we start looping from the colliding block
-			// //also change this loop so it loops through the blocks the object was orginally in
-			// //then loop through the new blocks it's in
-			// for (int row_index=left_collision_id; row_index<old_row_count; row_index++) {
-			// 	for (int column_index=top_collision_id; column_index<old_column_count; column_index++) {
-			// 		Block block = old_obj_block_arr[row_index][column_index];
-			//
-			// 		int block_column = block.get_index() % _BLOCK_COLUMN_COUNT;
-			// 		int block_row = block.get_index() % _BLOCK_ROW_CONUT;
-			//
-			// 		if (block_within_bounds(block.get_index(), new_block_bottom_right_id, new_block_bottom_right_id)) {
-			// 			block.remove(obj);
-			// 			continue;
-			// 		}
-			// 	}
-			// }
-			//
-
-
-			for (Block[] row : old_block_arr) {
-				for (Block block : row) {
-					if (!block_within_bounds(block.get_index(), new_block_top_left_id, new_block_bottom_right_id)) {
-						block.remove(obj);
-						continue;
-					}
-				}
-			}
-
-			for (Block[] row : new_block_arr) {
-				for (Block block : row) {
-					if (!block_within_bounds(block.get_index(), old_top_left_id, old_bottom_right_id)) {
-						block.add(obj);
-						continue;
-					}
-				}
-			}
+			adjust_blocks_of_obj(obj, signal.old_rect());
 		});
 	}
 
@@ -404,6 +336,68 @@ public class VSpaceMap {
 		);
 
 		return block_count;
+	}
+
+	private IntPair get_collide_space(Block[][] space1, Block[][] space2) {
+		//if two arrs have the same colliding block get their colliding block
+		
+		Block first_top_left = space1[0][0];
+		Block second_top_left = space2[0][0];
+
+		IntPair first_pos = new IntPair(first_top_left._index % _BLOCK_COLUMN_COUNT, first_top_left._index / _BLOCK_COLUMN_COUNT);
+		IntPair second_pos = new IntPair(second_top_left._index % _BLOCK_COLUMN_COUNT, second_top_left._index / _BLOCK_COLUMN_COUNT);
+
+		IntPair pair = new IntPair(
+			second_pos.num1() - first_pos.num1,
+			second_pos.num2() - first_pos.num2
+		);
+
+		return pair;
+	}
+
+	public void adjust_blocks_of_obj(GenericSceneObject obj, Rect old_rect) {
+		Rect obj_rect = obj.get_transform().get_scale_rect();
+		
+		//int x_block_count = get_obj_occupnacy_count(obj_rect.x, obj_rect.w, obj.get_transform().scale.x);
+		//int y_block_count = get_obj_occupnacy_count(obj_rect.y, obj_rect.h, obj.get_transform().scale.y);
+
+		Block[][] old_blocks = get_arr_of_occupied_blocks(old_rect);
+		Block[][] new_blocks = get_arr_of_occupied_blocks(obj_rect);
+
+		IntPair collide_info = get_collide_space(old_blocks, new_blocks);
+		
+		Iterable<Block> arr_iterator;
+
+		
+
+		for (Block[] row : old_blocks) {
+			if (collide_info.num1 < 0) {
+				arr_iterator = Iterators.array_reversed(row);
+			}
+			
+			else {
+				arr_iterator = Iterators.array_iterator(row);
+			}
+
+			for (Iterators.EnumerateResult<Block> result : Iterators.enumerate(arr_iterator)) {
+				if (result.index >= Math.abs(collide_info.num1())) {
+					break;
+				}
+				Block block = result.value; 
+
+				block.remove(obj);
+			}
+		}
+
+		int start_column = old_blocks[0].length - collide_info.num1();
+
+		for (Block[] row : new_blocks) {
+			for (int j=start_column; j<row.length; j++) {
+				Block block = row[j];	
+
+				block.add(obj);
+			}
+		}
 	}
 
 	public int get_block_column_count() {

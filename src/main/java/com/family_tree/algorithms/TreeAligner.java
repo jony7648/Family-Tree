@@ -135,8 +135,8 @@ public class TreeAligner {
 		}
 
 		//position odd nodes to the left even to the right
-		PositionType position_type = get_position_type(parent_node);
-		position_type = PositionType.Right;
+		//PositionType position_type = get_position_type(parent_node);
+		PositionType position_type = PositionType.Right;
 
 		DrawNode anchor_draw_node = get_anchor_node(parent_node); 
 
@@ -145,7 +145,7 @@ public class TreeAligner {
 
 		switch (position_type) {
 			case Left -> new_draw_node.set_x(anchor_draw_node.get_x() - DrawNode.TOTAL_NODE_GAP_SPACE_X);
-			case Right -> new_draw_node.set_x(anchor_draw_node.get_x() + DrawNode.TOTAL_NODE_GAP_SPACE_X);
+			case Right -> new_draw_node.set_x(anchor_draw_node.get_right_x() + DrawNode.TOTAL_NODE_GAP_SPACE_X);
 		}
 
 		parent_node.add_child(new_node);
@@ -161,7 +161,6 @@ public class TreeAligner {
 		}
 
 		NArrayNode<DrawNode> root_node = iter_node.get_parent();
-		System.out.println(root_node.get_value().get_person());
 
 		//position top parent decendants
 		Iterable<NArrayNode<DrawNode>> iterable;
@@ -197,7 +196,6 @@ public class TreeAligner {
 
 			top_draw_node.set_x(top_draw_node.get_x() + DrawNode.TOTAL_NODE_GAP_SPACE_X * move_factor);
 		}
-
 		scene.add_object(new_draw_node);	
 	}
 

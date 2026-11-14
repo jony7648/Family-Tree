@@ -29,6 +29,7 @@ com/family_tree/draw_components/classes/GenericSceneObject.class
 com/family_tree/scene_components/generic_windows/NodeCreationWindow.class
 com/family_tree/math_classes/VSpaceMap$Block.class
 com/family_tree/Listener/Listener$EmptySignal.class
+com/family_tree/math_classes/VSpaceMap$IntPair.class
 com/family_tree/scene_components/generic_windows/SearchPanel$Signal.class
 com/family_tree/singletons/GeoInfo.class
 com/family_tree/serialized_structures/AppConfig.class
@@ -37,6 +38,7 @@ com/family_tree/jcomponents/HistoryScrollMenu.class
 com/family_tree/structures/classes/generic/Stack.class
 com/family_tree/util/Util$Pair.class
 com/family_tree/draw_components/classes/Camera.class
+com/family_tree/util/Iterators.class
 com/family_tree/util/FileUtil.class
 com/family_tree/algorithms/Search$ISearchableObject.class
 com/family_tree/data_storage/Date$Month.class
@@ -51,7 +53,9 @@ com/family_tree/jcomponents/DrawPanel$Parameters.class
 com/family_tree/data_storage/Person$Gender.class
 com/family_tree/structures/classes/node_structures/LinkedList.class
 com/family_tree/jcomponents/interfaces/GenericDesktopPanel$2.class
+Tiger.class
 com/family_tree/algorithms/TreeAligner$PositionType.class
+com/family_tree/util/Iterators$ReversedArrayIterator.class
 com/family_tree/scene_components/Scene.class
 com/family_tree/jcomponents/DrawPanel$PaneInfo.class
 com/family_tree/math_classes/Geometry$Vector2.class
@@ -90,7 +94,9 @@ com/family_tree/structures/classes/node_structures/DoublyLinkedList$Node.class
 com/family_tree/draw_objects/geometric/LineObject.class
 com/family_tree/jcomponents/DateSelectionField$1.class
 com/family_tree/application_menu/AppBar$MenuItemAction.class
+com/family_tree/util/Iterators$Enumerator.class
 com/family_tree/jcomponents/DrawPanel$PlayArea$ZoomKey.class
+com/family_tree/util/Iterators$ArrayIterator.class
 com/family_tree/draw_components/interfaces/IDrawObject.class
 com/family_tree/math_classes/BackupVSpaceMap.class
 com/family_tree/math_classes/Geometry$I2DSpace.class
@@ -115,6 +121,7 @@ com/family_tree/scene_components/generic_windows/NodeCreationWindow$SignalNodeCr
 com/family_tree/math_classes/VSpaceMap$RowColumnPair.class
 com/family_tree/structures/classes/node_structures/PositionalList$Node.class
 com/family_tree/application_menu/AppBarEnums$FindMenuOptions.class
+com/family_tree/util/Iterators$EnumerateResult.class
 com/family_tree/structures/classes/node_structures/LinkedList$Node.class
 com/family_tree/algorithms/Sort$ISortable.class
 com/family_tree/structures/classes/node_structures/DoublyLinkedList$ListIterator.class

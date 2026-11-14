@@ -10,6 +10,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import com.family_tree.util.*;
+import com.family_tree.util.*;
 import com.family_tree.action_timeline_systems.*;
 import com.family_tree.structures.classes.node_structures.*;
 import com.family_tree.structures.interfaces.*;
@@ -32,6 +33,10 @@ import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import java.io.File;
 import java.nio.file.Path;
 
+class Tiger {
+	int age;
+	int speed;
+}
 
 /*
 
@@ -98,34 +103,19 @@ public class Main {
 		return narray_node;
 	}
 
+
+
+
 	public static void main(String[] args) {
-		PositionalList<Integer> list = new PositionalList<>();	
+		PositionalList<Tiger> list = new PositionalList<>();
 
-		for (int i=0; i<10; i++) {
-			list.append(i+1);
-		}
+		Tiger tiger = new Tiger();
+		tiger.age = 3;
+		tiger.speed = 5;
 
-		list.remove(2);
-		list.insert(0, 99);
-		Integer int_63 = 63;
-		PositionalList<Integer>.Node pos = list.prepend(int_63);
-		list.add_after(pos, 55);
-		list.remove_tail();
-		list.set(2, 15445);
+		list.append(tiger);
 
-
-		PositionalList<Integer>.Node after = list.get_node(new Integer(9));
-		Integer after_val = list.get_prev_value(after);
-		System.out.println(list.size());
-
-
-		System.out.println("------list-----");
-		for (Integer num : list) {
-			
-			System.out.println(num);
-		}
-		 //if(true) {return;};
-
+		list.remove(tiger);
 
 		
 		final String TITLE = "Family Tree";

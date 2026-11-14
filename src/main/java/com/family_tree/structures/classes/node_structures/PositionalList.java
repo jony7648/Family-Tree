@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class PositionalList<T> implements Iterable<T> {
-	//positional list for the hashmap
 	Node _head = new Node(null, null, null);
 	Node _tail = new Node(null, null, null);
 	int _size = 0;
@@ -273,7 +272,7 @@ public class PositionalList<T> implements Iterable<T> {
 			curr_node = curr_node.get_next();	
 		}
 
-		if (curr_node == null) {
+		if (curr_node == _tail) {
 			throw new NoSuchElementException("No node was associated with this object!");
 		}
 
@@ -320,7 +319,7 @@ public class PositionalList<T> implements Iterable<T> {
 			return null;
 		}
 		
-		return remove(get_node(obj));	
+		return remove(node);	
 	}
 
 	public Node get_next_node(Node node) {
