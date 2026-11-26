@@ -32,6 +32,29 @@ public class PositionalList<T> implements Iterable<T> {
 		}
 	}
 
+	public class ReversedListIterator implements Iterator<T> {
+		Node node = _tail.prev;
+
+		public ReversedListIterator() {}
+
+		public ReversedListIterator(Node start_node) {
+			if (start_node.is_valid()) {
+				node = start_node;
+			}
+		}
+
+		public T next() {
+			Node old_node = node;
+			node = node.get_prev();
+
+			return old_node.get_value();
+		}
+
+		public boolean hasNext() {
+			return node != _tail;
+		}
+	}
+
 	public class NodeIterator implements Iterator<Node> {
 		Node node = _head.next;
 
@@ -342,12 +365,24 @@ public class PositionalList<T> implements Iterable<T> {
 		return node.get_prev();	
 	}
 
-	public T get_next_value(Node node) throws NoSuchElementException {
-		return get_next_node(node).get_value();	
+	public T get_next_value(Node node) {
+		Node value = get_next_node(node);
+
+		if (value == null) {
+			return null;
+		}
+		
+		return value.get_value();
 	}
 
-	public T get_prev_value(Node node) throws NoSuchElementException {
-		return get_prev_node(node).get_value();	
+	public T get_prev_value(Node node) {
+		Node value = get_prev_node(node);
+
+		if (value == null) {
+			return null;
+		}
+		
+		return value.get_value();
 	}
 
 	public int size() {
@@ -366,7 +401,13 @@ public class PositionalList<T> implements Iterable<T> {
 		return new ListIterator(node);
 	}
 
-	
+	public Iterator<T> reversed() {
+		return new ReversedListIterator();	
+	}
+
+	public Iterator<T> reversed(Node node) {
+		return new ReversedListIterator(node);	
+	}
 
 	public boolean node_has_next(Node node) {
 		return node.next != _tail;

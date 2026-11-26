@@ -117,7 +117,7 @@ public class NArrayNodeIterator {
 		private Queue<NArrayNode<T>> node_queue = new Queue<>();
 		
 		public BFS(NArrayNode<T> root_node) {
-			for (NArrayNode<T> node : root_node.get_child_arr()) {
+			for (NArrayNode<T> node : root_node.get_children()) {
 				node_queue.add(node);
 			}
 		}
@@ -125,7 +125,7 @@ public class NArrayNodeIterator {
 		public NArrayNode<T> next() {
 			NArrayNode<T> queue_node = node_queue.front();
 			
-			for (NArrayNode<T> node : queue_node.get_child_arr()) {
+			for (NArrayNode<T> node : queue_node.get_children()) {
 				System.out.println(node.get_value());
 				node_queue.add(node);
 			}
@@ -145,7 +145,7 @@ public class NArrayNodeIterator {
 		private Queue<NArrayNode<T>> node_queue = new Queue<>();
 		
 		public FromRightBFS(NArrayNode<T> root_node) {
-			for (NArrayNode<T> node : root_node.get_child_arr().reversed()) {
+			for (NArrayNode<T> node : root_node.get_reversed_children()) {
 				node_queue.add(node);
 			}
 		}
@@ -153,7 +153,7 @@ public class NArrayNodeIterator {
 		public NArrayNode<T> next() {
 			NArrayNode<T> queue_node = node_queue.front();
 			
-			for (NArrayNode<T> node : queue_node.get_child_arr().reversed()) {
+			for (NArrayNode<T> node : queue_node.get_reversed_children()) {
 				node_queue.add(node);
 			}
 

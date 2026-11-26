@@ -464,6 +464,7 @@ public class DrawPanel extends JDesktopPane {
 	public SearchPanel _search_panel = new SearchPanel(_pane_info);
 	public NodeCreationWindow _node_creation_menu = new NodeCreationWindow(_pane_info);
 	public EditAttributeMenu _edit_attrib_menu = new EditAttributeMenu(_pane_info);
+	public DeleteNodeWindow _delete_node_window = new DeleteNodeWindow(_pane_info);
 	public OptionCycler<DrawNode> _option_cycler = new OptionCycler<>();
 	public HistoryScrollMenu _history_scroll_menu;
 
@@ -492,6 +493,7 @@ public class DrawPanel extends JDesktopPane {
 		setOpaque(true);
 		add(_search_panel);
 		add(_edit_attrib_menu);
+		add(_delete_node_window);
 		add(_node_creation_menu);
 
 		add(_option_cycler);
@@ -501,7 +503,7 @@ public class DrawPanel extends JDesktopPane {
 		apply_input();
 	
 		
-		_search_panel.listener.add_receiver(SearchPanel.Signal.NodeSearched, (search_panel, signal) -> {
+		_search_panel.listener.add_receiver(this, SearchPanel.Signal.NodeSearched, (search_panel, signal) -> {
 			if (!(signal.sig_data instanceof SearchPanel.SignalSearchInfo)) {
 				return;
 			}
@@ -536,7 +538,7 @@ public class DrawPanel extends JDesktopPane {
 			_search_panel.setVisible(false);
 		});
 
-		_option_cycler.listener.add_receiver(OptionCycler.Signal.OptionCycled, (_option_cycler, signal) -> {
+		_option_cycler.listener.add_receiver(this, OptionCycler.Signal.OptionCycled, (_option_cycler, signal) -> {
 			if (!(signal.sig_data instanceof OptionCycler.SignalOptionCycled)) {
 				return;
 			}
@@ -548,7 +550,7 @@ public class DrawPanel extends JDesktopPane {
 			_play_area.get_camera().teleport_to_object(node);
 		});
 
-		_node_creation_menu.listener.add_receiver(NodeCreationWindow.Signal.NodeCreated, (emitter, emit_signal) -> {
+		_node_creation_menu.listener.add_receiver(this, NodeCreationWindow.Signal.NodeCreated, (emitter, emit_signal) -> {
 			if (!(emit_signal.sig_data instanceof NodeCreationWindow.SignalNodeCreated)) {
 				return;
 			}
@@ -563,7 +565,7 @@ public class DrawPanel extends JDesktopPane {
 			
 		});
 
-		_edit_attrib_menu.listener.add_receiver(EditAttributeMenu.Signal.value_edited, (emitter, emit_signal) -> {
+		_edit_attrib_menu.listener.add_receiver(this, EditAttributeMenu.Signal.value_edited, (emitter, emit_signal) -> {
 			if (!(emit_signal.sig_data instanceof EditAttributeMenu.SignalValueEdited)) {
 				return;
 			}
@@ -576,6 +578,26 @@ public class DrawPanel extends JDesktopPane {
 			person.set_value_from_edit_option((Person.EditMenuOption)signal.option_value(), signal.value());
 		});
 
+		_delete_node_window.listener.add_receiver(this, DeleteNodeWindow.Signal.Delete, (delete_window, signal) -> {
+			if (!(signal.sig_data instanceof DeleteNodeWindow.SignalDelete)) {
+				return;
+			}
+
+			DeleteNodeWindow.SignalDelete sig_data = (DeleteNodeWindow.SignalDelete)signal.sig_data;
+		});
+
+		_delete_node_window.listener.add_receiver(this, DeleteNodeWindow.Signal.Delete, (delete_window, signal) -> {
+			if (!(signal.sig_data instanceof DeleteNodeWindow.SignalDelete)) {
+				return;
+			}
+
+			DeleteNodeWindow.SignalDelete sig_data = (DeleteNodeWindow.SignalDelete)signal.sig_data;
+
+			delete_node(sig_data.type());
+
+		});
+		
+		
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
@@ -597,6 +619,33 @@ public class DrawPanel extends JDesktopPane {
 		Person person = _draw_root_node.get_value().get_person();
 
 		_edit_attrib_menu.prompt_value_change(person.get_value_from_edit_option(edit_option), edit_option);
+	}
+
+	private void delete_node(DeleteNodeWindow.DeleteType type) {
+		NArrayNode<DrawNode> node = _play_area.get_selected_node();
+		
+		if (node == null) {
+			return;
+		}
+
+		
+		DrawNode draw_node = node.get_value();
+
+		switch (type) {
+			case OnlyDeleteChild:
+				TreeAligner.delete_node(draw_node);
+				_scene.remove_object(draw_node);
+				break;
+		}
+	}
+
+	public void prompt_node_deletion() {
+		NArrayNode<DrawNode> node = _play_area.get_selected_node();
+		
+		if (node == null) {
+			return;
+		}
+		_delete_node_window.setVisible(true);
 	}
 
 	public void give_focus_to_play_area() {

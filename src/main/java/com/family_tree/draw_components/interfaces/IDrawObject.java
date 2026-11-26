@@ -24,24 +24,4 @@ public interface IDrawObject {
 
 		return new_transform;
 	}
-
-	default public void update_anchor_objects(LinkedList<IDrawObject> anchor_list, Vector2 new_parent_pos) {
-		Rect parent_rect = get_transform().rect;
-		
-		for (IDrawObject obj : anchor_list) { 
-			Rect obj_rect = obj.get_transform().rect;
-			
-			Vector2 pos_difference = new Vector2(
-				obj_rect.x - parent_rect.x,
-				obj_rect.y - parent_rect.y
-			);
-			
-			Vector2 new_obj_pos = new Vector2(
-				new_parent_pos.x + pos_difference.x,
-				new_parent_pos.y + pos_difference.y
-			);
-			
-			obj.set_position(new_obj_pos);
-		}
-	}
 }

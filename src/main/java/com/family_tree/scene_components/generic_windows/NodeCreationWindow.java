@@ -42,8 +42,6 @@ public class NodeCreationWindow extends GenericDesktopPanel {
 	private JPanel _main_panel = new JPanel();
 	private DrawPanel.PaneInfo _pane_info;
 
-	private Dimension _window_bounds = new Dimension(300, 600);
-		
 	
 	private EntryFieldLabel _first_name_pair = new EntryFieldLabel("First Name");
 	private EntryFieldLabel _last_name_pair = new EntryFieldLabel("Last Name");

@@ -12,6 +12,7 @@
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/data_storage/Person.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/draw_components/classes/Camera.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/draw_components/classes/GenericSceneObject.java
+/Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/draw_components/classes/GenericSceneObjectViewer.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/draw_components/interfaces/IDrawObject.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/draw_objects/DrawNode.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/draw_objects/geometric/LineObject.java
@@ -28,6 +29,7 @@
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/math_classes/VSpaceMap.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/panels/MainPanel.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/scene_components/Scene.java
+/Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/scene_components/generic_windows/DeleteNodeWindow.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/scene_components/generic_windows/EditAttributeMenu.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/scene_components/generic_windows/NodeCreationWindow.java
 /Users/jony7648/coding/java/test/search_through_entries/src/main/java/com/family_tree/scene_components/generic_windows/SearchPanel.java

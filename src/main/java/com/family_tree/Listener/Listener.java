@@ -2,6 +2,7 @@ package com.family_tree.Listener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 public class Listener<HolderType, SignalEnum extends Enum<SignalEnum>> {
 	int signal_count = 0;
@@ -28,32 +29,28 @@ public class Listener<HolderType, SignalEnum extends Enum<SignalEnum>> {
 	}
 
 	private class ReceiverRow {
-		ArrayList<ISignalFire<HolderType>> receiver_list = new ArrayList<>();
+		HashMap<Object, Receiver<HolderType>> receiver_map = new HashMap<>();
 		private boolean locked = false;
 
-		public ISignalFire<HolderType> get(int id) {
-			return receiver_list.get(id);
-		}
-
-		public void add(ISignalFire<HolderType> emit_interface) {
+		public void add(Object key, Receiver<HolderType> receiver) {
 			if (locked) {
 				return;
 			}
 			
-			receiver_list.add(emit_interface);
+			receiver_map.put(key, receiver);
 		}
 
-		public void remove(int id) {
+		public void remove(Object key) {
 			if (locked) {
 				return;
 			}
 
-			receiver_list.remove(id);
+			receiver_map.remove(key);
 		}
 
 		public void fire_signals(Signal<HolderType> signal) {
-			for (ISignalFire<HolderType> signal_interface : receiver_list) {
-				signal_interface.fire(holder, signal);
+			for (Receiver<HolderType> receiver : receiver_map.values()) {
+				receiver.emit_interface.fire(holder, signal);
 			}
 		}
 
@@ -61,6 +58,11 @@ public class Listener<HolderType, SignalEnum extends Enum<SignalEnum>> {
 			fire_signals(new Signal<HolderType>());		
 		}
 	}
+
+	public record Receiver<HolderType> (
+		Object key,
+		ISignalFire<HolderType> emit_interface
+	){};
 
 	
 	public Listener(HolderType holder, Class<SignalEnum> SignalEnumClass) {
@@ -74,9 +76,15 @@ public class Listener<HolderType, SignalEnum extends Enum<SignalEnum>> {
 		}
 	}
 
-	public void add_receiver(SignalEnum id, ISignalFire<HolderType> emit_interface) {
+	public void add_receiver(Object key, SignalEnum id, ISignalFire<HolderType> emit_interface) {
 		ReceiverRow receiver_row = receiver_row_list.get(id.ordinal());
-		receiver_row.add(emit_interface);	
+		Receiver<HolderType> receiver = new Receiver<>(key, emit_interface);
+		
+		receiver_row.add(key, receiver);	
+	}
+
+	public void remove_receiver(Object key, SignalEnum id) {
+		receiver_row_list.get(id.ordinal()).remove(key);
 	}
 
 	public void fire_signal(SignalEnum id, Signal<HolderType> signal) {

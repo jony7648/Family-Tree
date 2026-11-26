@@ -1,22 +1,9 @@
 package com.family_tree.scene_components.generic_windows;
 
-import com.family_tree.draw_objects.*;
 import com.family_tree.Listener.*;
-
-import com.family_tree.math_classes.VSpaceMap;
-
-import com.family_tree.jcomponents.DateSelectionField;
 import com.family_tree.jcomponents.interfaces.*;
-import com.family_tree.data_storage.Person;
-import com.family_tree.singletons.*;
 import com.family_tree.jcomponents.*;
-
-import java.awt.*;
 import javax.swing.*;
-import java.awt.geom.Rectangle2D;
-
-import java.time.LocalDate;
-
 
 public class EditAttributeMenu extends GenericDesktopPanel {
 	public enum Signal {

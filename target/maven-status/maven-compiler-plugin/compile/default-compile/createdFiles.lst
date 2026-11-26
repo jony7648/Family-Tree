@@ -1,5 +1,6 @@
 TreeImage.class
 com/family_tree/util/Util$IKeyAdapaterMethod.class
+com/family_tree/util/Iterators$ReversedListIterator.class
 com/family_tree/jcomponents/OptionCycler.class
 com/family_tree/jcomponents/DrawPanel$PlayArea$3.class
 com/family_tree/math_classes/Geometry$Rect.class
@@ -23,6 +24,7 @@ com/family_tree/data_storage/Person$SearchProperty.class
 com/family_tree/structures/classes/node_structures/NArrayNodeIterator$BFS.class
 com/family_tree/Listener/Listener.class
 com/family_tree/scene_components/generic_windows/SearchPanel$SignalSearchInfo.class
+com/family_tree/application_menu/AppBarEnums$EditMenuOptions.class
 com/family_tree/math_classes/Geometry.class
 com/family_tree/structures/classes/node_structures/NArrayNodeIterator$Post.class
 com/family_tree/draw_components/classes/GenericSceneObject.class
@@ -33,6 +35,8 @@ com/family_tree/math_classes/VSpaceMap$IntPair.class
 com/family_tree/scene_components/generic_windows/SearchPanel$Signal.class
 com/family_tree/singletons/GeoInfo.class
 com/family_tree/serialized_structures/AppConfig.class
+com/family_tree/Listener/Listener$Receiver.class
+com/family_tree/scene_components/generic_windows/DeleteNodeWindow$DeleteType.class
 com/family_tree/jcomponents/DrawPanel$PlayArea$1.class
 com/family_tree/jcomponents/HistoryScrollMenu.class
 com/family_tree/structures/classes/generic/Stack.class
@@ -53,12 +57,12 @@ com/family_tree/jcomponents/DrawPanel$Parameters.class
 com/family_tree/data_storage/Person$Gender.class
 com/family_tree/structures/classes/node_structures/LinkedList.class
 com/family_tree/jcomponents/interfaces/GenericDesktopPanel$2.class
-Tiger.class
 com/family_tree/algorithms/TreeAligner$PositionType.class
 com/family_tree/util/Iterators$ReversedArrayIterator.class
 com/family_tree/scene_components/Scene.class
 com/family_tree/jcomponents/DrawPanel$PaneInfo.class
 com/family_tree/math_classes/Geometry$Vector2.class
+com/family_tree/scene_components/generic_windows/DeleteNodeWindow$SignalDelete.class
 com/family_tree/structures/classes/node_structures/PositionalList$NodeIterator.class
 com/family_tree/scene_components/generic_windows/NodeCreationWindow$Signal.class
 com/family_tree/data_storage/Person.class
@@ -67,6 +71,7 @@ com/family_tree/structures/classes/node_structures/LinkedList$ListIterator.class
 com/family_tree/structures/interfaces/NodeInterfaces$ITreeNode.class
 com/family_tree/jcomponents/OptionCycler$SignalOptionCycled.class
 com/family_tree/application_menu/AppBar.class
+com/family_tree/util/Iterators$EmptyIterator.class
 com/family_tree/draw_objects/DrawNode$NODE_POSITION.class
 com/family_tree/draw_objects/DrawNode.class
 com/family_tree/jcomponents/interfaces/GenericDesktopPanel$1.class
@@ -80,6 +85,8 @@ com/family_tree/jcomponents/OptionCycler$Signal.class
 com/family_tree/jcomponents/DrawPanel$PlayArea$MovementKey.class
 com/family_tree/structures/classes/node_structures/NArrayNodeIterator$FromRightBFS.class
 com/family_tree/algorithms/TreeAligner.class
+com/family_tree/util/Iterators$ListIterator.class
+com/family_tree/scene_components/generic_windows/DeleteNodeWindow.class
 Main$2.class
 com/family_tree/structures/classes/node_structures/NArrayNodeIterator$Pre.class
 com/family_tree/scene_components/generic_windows/EditAttributeMenu$Signal.class
@@ -89,6 +96,7 @@ com/family_tree/structures/classes/generic/Queue.class
 com/family_tree/scene_components/generic_windows/EditAttributeMenu.class
 com/family_tree/jcomponents/DrawPanel$1.class
 com/family_tree/jcomponents/DrawPanel$PlayArea$2.class
+com/family_tree/scene_components/generic_windows/DeleteNodeWindow$Signal.class
 com/family_tree/jcomponents/EnumButton.class
 com/family_tree/structures/classes/node_structures/DoublyLinkedList$Node.class
 com/family_tree/draw_objects/geometric/LineObject.class
@@ -102,6 +110,7 @@ com/family_tree/math_classes/BackupVSpaceMap.class
 com/family_tree/math_classes/Geometry$I2DSpace.class
 com/family_tree/jcomponents/DrawPanel$PlayArea.class
 com/family_tree/action_timeline_systems/HistoryAction$ActionEvent.class
+com/family_tree/structures/classes/node_structures/PositionalList$ReversedListIterator.class
 com/family_tree/structures/classes/node_structures/PositionalList.class
 com/family_tree/Listener/Listener$Signal.class
 com/family_tree/draw_components/classes/GenericSceneObject$Signal.class
@@ -127,6 +136,7 @@ com/family_tree/algorithms/Sort$ISortable.class
 com/family_tree/structures/classes/node_structures/DoublyLinkedList$ListIterator.class
 com/family_tree/scene_components/generic_windows/EditAttributeMenu$SignalValueEdited.class
 com/family_tree/algorithms/Sort.class
+com/family_tree/draw_components/classes/GenericSceneObject$Viewer.class
 com/family_tree/draw_components/classes/GenericSceneObject$SignalTransformChanged.class
 com/family_tree/draw_components/interfaces/IDrawObject$DrawParameters.class
 com/family_tree/jcomponents/DrawPanel$3.class

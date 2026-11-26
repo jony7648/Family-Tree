@@ -37,8 +37,6 @@ public class DrawNode extends GenericSceneObject implements IDrawObject, Sort.IS
 	private boolean _is_root_node = false;
 	private boolean _has_been_initally_positioned = false;
 
-	public LinkedList<IDrawObject> anchor_list = new LinkedList<>();
-
 	public long _order_value = 0;
 
 	private ImageLoader.ImageReference _image_refrence = new ImageLoader.ImageReference();
@@ -92,26 +90,37 @@ public class DrawNode extends GenericSceneObject implements IDrawObject, Sort.IS
 
 	public LineObject add_child_node(DrawNode child) {
 		Transform child_transform = child.get_transform();
+		Rect child_scale_rect = child_transform.get_scale_rect();
 
 		Transform transform = get_transform();
 		
 		Vector2 start_pos = new Vector2(
-			transform.rect.x + transform.rect.w / 2,
-			transform.rect.y + transform.rect.h
+			get_x(),
+			get_y()
+		);
+
+		Vector2 start_offset = new Vector2 (
+			transform.rect.w / 2,
+			transform.rect.h
 		);
 
 
-		Vector2 end_pos = new Vector2(
-			child_transform.rect.x + child_transform.rect.w / 2,
-			child_transform.rect.y
+		Vector2 end_offset = new Vector2(
+			child_transform.rect.w / 2,
+			0
 		);
-		
-		System.out.println(start_pos);
-		System.out.println(end_pos);
-		
-		LineObject line = new LineObject(start_pos, end_pos, new Vector2(1));
 
-		anchor_list.append(line);
+		Vector2 line_scale = new Vector2(1);
+		
+		LineObject line = new LineObject(
+			start_pos, 
+			start_offset, 
+			child, 
+			end_offset,
+			line_scale
+		);
+
+		add_to_anchor_list(line);
 
 		return line;
 	}
@@ -145,12 +154,6 @@ public class DrawNode extends GenericSceneObject implements IDrawObject, Sort.IS
 		Person person = get_person();
 		
 		return get_order(person.get_first_name(), person.get_last_name());
-	}
-
-	@Override
-	public void set_position(Vector2 position) {
-		super.set_position(position);
-		update_anchor_objects(anchor_list, position);	
 	}
 
 	public void set_tree_node(NArrayNode<DrawNode> node) {

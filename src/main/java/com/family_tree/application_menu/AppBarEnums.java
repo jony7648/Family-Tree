@@ -4,12 +4,16 @@ public class AppBarEnums {
 	public enum NewMenuOptions {
 		Node,
 	}
+
+	public enum EditMenuOptions {
+		Delete,
+		EditProperties,
+	}
 	
 	public enum FindMenuOptions {
 		Nodes	
 	}
 
-	
 	 
 	
 }

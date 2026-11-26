@@ -32,12 +32,6 @@ import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 
 import java.io.File;
 import java.nio.file.Path;
-
-class Tiger {
-	int age;
-	int speed;
-}
-
 /*
 
 String[] edit_menu_options = {"First Name", "Last Name", "Gender", "Birth Date", 
@@ -107,17 +101,6 @@ public class Main {
 
 
 	public static void main(String[] args) {
-		PositionalList<Tiger> list = new PositionalList<>();
-
-		Tiger tiger = new Tiger();
-		tiger.age = 3;
-		tiger.speed = 5;
-
-		list.append(tiger);
-
-		list.remove(tiger);
-
-		
 		final String TITLE = "Family Tree";
 
 		final String CONFIG_FILE_PATH = "config.toml";
@@ -209,6 +192,7 @@ public class Main {
 		JMenu new_menu = new JMenu("New");
 		
 		JMenu edit_menu = new JMenu("Edit");
+		JMenu person_edit_menu = new JMenu("EditMenu");
 		JMenu history_menu = new JMenu("History");
 		JMenu find_menu = new JMenu("Find");
 
@@ -232,12 +216,13 @@ public class Main {
 			}
 		});
 		
-		AppBar.create_menu_items(edit_menu, Person.EditMenuOption.class, (e, edit_option) -> {
+		AppBar.create_menu_items(person_edit_menu, Person.EditMenuOption.class, (e, edit_option) -> {
 			draw_panel.edit_node(edit_option);
 		});
 		
 		menu_bar.add(new_menu);
 		menu_bar.add(edit_menu);
+		menu_bar.add(person_edit_menu);
 		menu_bar.add(history_menu);
 		menu_bar.add(find_menu);
 
@@ -245,6 +230,12 @@ public class Main {
 		AppBar.create_menu_items(new_menu, AppBarEnums.NewMenuOptions.class, (e, edit_option) -> {
 			switch (edit_option) {
 				case Node -> draw_panel.display_node_creation_menu();
+			}
+		});
+
+		AppBar.create_menu_items(edit_menu, AppBarEnums.EditMenuOptions.class, (e, edit_option) -> {
+			switch (edit_option) {
+				case Delete -> draw_panel.prompt_node_deletion();
 			}
 		});
 		AppBar.create_menu_items(find_menu, AppBarEnums.FindMenuOptions.class, (e, edit_option) -> {

@@ -4,6 +4,8 @@ public class Geometry {
 	public static interface I2DSpace {
 		float get_x();
 		float get_y();
+
+		String toString();	
 	}
 	
 	public static class Vector2 implements I2DSpace {
@@ -95,7 +97,7 @@ public class Geometry {
 		public float h = 0;
 
 		@Override public String toString() {
-			return String.format("x: %s\ny: %s\nw: %s\nh: %s", x, y, w, h);
+			return String.format("{x: %s, y: %s, w: %s, h: %s}", x, y, w, h);
 		}
 
 		public Rect(float x, float y, float w, float h) {
@@ -138,6 +140,9 @@ public class Geometry {
 			h *= scale_y;			
 		}
 
+		public Vector2 get_position() {
+			return new Vector2(x, y);
+		}
 		
 
 		@Override
@@ -177,6 +182,10 @@ public class Geometry {
 				rect.w * scale.x,
 				rect.h * scale.y
 			);
+		}
+
+		public Vector2 get_position() {
+			return new Vector2(rect.x, rect.y);
 		}
 
 		public Transform copy() {

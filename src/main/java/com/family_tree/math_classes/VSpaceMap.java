@@ -219,11 +219,11 @@ public class VSpaceMap {
 
 
 		if (space.get_y() > _REGION_HEIGHT || space.get_y() < 0) {
-			throw new IndexOutOfBoundsException("VSPACEMAP: is out of bounds of the vertical map!");
+			throw new IndexOutOfBoundsException("VSPACEMAP: %s is out of bounds of the vertical map!".formatted(space.toString()));
 		}
 
 		if (space.get_x() > _REGION_WIDTH || space.get_x() < 0) {
-			throw new IndexOutOfBoundsException("VSPACEMAP: is out of bounds of the horizontal map!");
+			throw new IndexOutOfBoundsException("VSPACEMAP: %s is out of bounds of the horizontal map!".formatted(space.toString()));
 		}
 
 		return pair;	
@@ -261,7 +261,7 @@ public class VSpaceMap {
 		}
 
 		//adjust blocks when the object moves
-		obj.get_generic_object_listener().add_receiver(GenericSceneObject.Signal.TransformChanged, (holder, emit_signal) -> {
+		obj.get_generic_object_listener().add_receiver(this, GenericSceneObject.Signal.TransformChanged, (holder, emit_signal) -> {
 			if (!(emit_signal.sig_data instanceof GenericSceneObject.SignalTransformChanged)) {
 				return;
 			}
@@ -273,18 +273,17 @@ public class VSpaceMap {
 	}
 
 	public void remove(GenericSceneObject obj) throws IndexOutOfBoundsException {
-		Transform transform = obj.get_transform();
-
-		int x_block_count = get_obj_occupnacy_count(transform.rect.x, transform.rect.w, transform.scale.x);
-		int y_block_count = get_obj_occupnacy_count(transform.rect.y, transform.rect.h, transform.scale.y);
+		for (GenericSceneObject anchor_obj : obj.get_anchor_list_objects()) {
+			remove(anchor_obj);	
+		}
+		
+		obj.get_generic_object_listener().remove_receiver(this, GenericSceneObject.Signal.TransformChanged);
 
 		for (Block[] block_row : get_arr_of_occupied_blocks(obj.get_transform().get_scale_rect())) {
 			for (Block block : block_row) {
 				block.remove(obj);
 			}
 		}
-
-
 	}
 
 	public Block access(I2DSpace space) throws IndexOutOfBoundsException {
@@ -360,10 +359,13 @@ public class VSpaceMap {
 		
 		//int x_block_count = get_obj_occupnacy_count(obj_rect.x, obj_rect.w, obj.get_transform().scale.x);
 		//int y_block_count = get_obj_occupnacy_count(obj_rect.y, obj_rect.h, obj.get_transform().scale.y);
+		
+
 
 		Block[][] old_blocks = get_arr_of_occupied_blocks(old_rect);
 		Block[][] new_blocks = get_arr_of_occupied_blocks(obj_rect);
 
+		
 		IntPair collide_info = get_collide_space(old_blocks, new_blocks);
 		
 		Iterable<Block> arr_iterator;
@@ -390,6 +392,13 @@ public class VSpaceMap {
 		}
 
 		int start_column = old_blocks[0].length - collide_info.num1();
+
+
+		//in the case that the obj is taking up a certain number of blocks then 
+		//after the shift it's taking up less blocks
+		if (start_column < 0) {
+			start_column = 0;
+		}
 
 		for (Block[] row : new_blocks) {
 			for (int j=start_column; j<row.length; j++) {
